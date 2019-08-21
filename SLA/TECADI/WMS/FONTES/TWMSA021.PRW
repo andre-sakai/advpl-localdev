@@ -1077,8 +1077,9 @@ Static Function sfInfoServ(mvNumOs)
 	TButton():New( 006, 138, "Gerar Relatório p/ conferência (Total)"   , _oPnlRodape,{|| MsgRun("Abrindo Relatório...", "Aguarde...", {|| CursorWait(), sfReport( .F. ), CursorArrow()}) },100,010,,,.F.,.T.,.F.,,.F.,,,.F. )
 	TButton():New( 006, 244, "Gerar Relatório p/ conferência (Diverg.)" , _oPnlRodape,{|| MsgRun("Abrindo Relatório...", "Aguarde...", {|| CursorWait(), sfReport( .T. ), CursorArrow()}) },100,010,,,.F.,.T.,.F.,,.F.,,,.F. )
 	TButton():New( 006, 350, "Gerar Relatório p/ assinar (Auditoria)"   , _oPnlRodape,{|| MsgRun("Abrindo Relatório...", "Aguarde...", {|| CursorWait(), sfReport2()    , CursorArrow()}) },100,010,,,.F.,.T.,.F.,,.F.,,,.F. )
-	TButton():New( 006, 456, "Verificar Divergencias"   , _oPnlRodape,{|| MsgRun("Verificando...", "Aguarde...", {|| CursorWait(), sfCompPR()    , CursorArrow()}) },100,010,,,.F.,.T.,.F.,,.F.,,,.F. )
-	TButton():New( 006, 572, "Cancelar"            , _oPnlRodape,{|| _oDlgDetInvent:END() },60,010,,,.F.,.T.,.F.,,.F.,,,.F. )
+	TButton():New( 006, 456, "Verificar Divergencias"   , _oPnlRodape,{|| MsgRun("Verificando...", "Aguarde...", {|| CursorWait(), sfPreComPR()    , CursorArrow()}) },060,010,,,.F.,.T.,.F.,,.F.,,,.F. )
+	TButton():New( 006, 522, "Cancelar"            , _oPnlRodape,{|| _oDlgDetInvent:END() },060,010,,,.F.,.T.,.F.,,.F.,,,.F. )
+	TButton():New( 006, 588, "advplexec"   , _oPnlRodape,{|| U_ADVPLEXEC()},060,010,,,.F.,.T.,.F.,,.F.,,,.F. )	
 
 	// ativa a tela
 	ACTIVATE MSDIALOG _oDlgDetInvent CENTERED
@@ -2315,16 +2316,240 @@ Static Function sfReport2()
 Return
 
 
+Static Function sfPreComPR()
+	Local _xAlias2 := getnextalias()
+	Local _aArea := getArea()
+	Local _lRet := .T.
+	Local _xIdent  := Z06->Z06_NUMOS
+
+	Local cNomeArqD := ''
+	Local _aStru:={}
+	Local _aCpoBro := {}
+	Local _oDlg
+	Local _aCores := {}
+	
+	Local aSize, aObjects
+	
+	Private _xAlias  := getnextalias()
+	Private _lInverte := .F.
+	Private _cMark   := GetMark()   
+	Private _oMark
+	Private nOpcA := 0
+	
+	_aStru	:=   {{"OK"	    ,"C",02,0},;
+				  { "FILIAL","C",TamSX3('Z19_FILIAL')[1],0},;
+				  { "CODIGO","C",TamSX3('Z19_IDENT')[1],0},;
+				  { "LOCAL","C",TamSX3('Z19_LOCAL')[1],0},;
+				  { "ENDERECO","C",TamSX3('Z19_ENDERE')[1],0},;
+				  { "PRODUTO","C",TamSX3('Z19_CODPRO')[1],0},;
+				  { "SUMPREV","N",TamSX3('Z19_QUANT')[1],TamSX3('Z19_QUANT')[2]},;
+				  { "SUMREAL","N",TamSX3('Z19_QUANT')[1],TamSX3('Z19_QUANT')[2]},;
+				  { "CONTAGEM","C",TamSX3('Z19_CONTAG')[1],0},;
+				  { "STATUS","C",1,0}}
+	
+
+	
+	_aCpoBro	:= {{ "OK"			,, "Mark"			,"@!"},;	
+					{ "FILIAL"		,, "Filial"			,"@!"},;
+					{ "CODIGO"		,, "OS"				,"@!"},;
+					{ "LOCAL"		,, "Armazem"		,"@!"},;
+					{ "ENDERECO"	,, "Endereco"		,"@!"},;
+					{ "PRODUTO"		,, "Produto"		,"@!"},;
+					{ "SUMPREV"		,, "Previsto"		,"@E 999,999.9999"},;
+					{ "SUMREAL"		,, "Realizado"		,"@E 999,999.9999"},;
+					{ "CONTAGEM"	,, "Contagem"		,"@999"},;
+					{ "STATUS"	,, "Status"		,"@!"};
+					}
+
+	
+	BeginSql Alias _xAlias2
+		%noparser%
+		SELECT '  ' OK, FILIAL, CODIGO, LOCAL, ENDERECO, PRODUTO, SUM(PREVISTO) SUMPREV, SUM(REALIZADO) SUMREAL, CONTAGEM, '3' STATUS 
+		FROM (
+			SELECT Z19_FILIAL FILIAL ,Z19_IDENT CODIGO,Z19_LOCAL "LOCAL",Z19_ENDERE ENDERECO, 
+					Z19_CODPRO PRODUTO, 0 AS PREVISTO,Z19_QUANT AS REALIZADO, Z19_CONTAG CONTAGEM 
+			FROM %table:Z19% Z19 (NOLOCK)
+			WHERE Z19_FILIAL = %EXP:XFILIAL('Z19')% AND Z19_IDENT = %EXP:_xIdent%  AND Z19.D_E_L_E_T_=' '
+			UNION
+			SELECT Z21_FILIAL FILIAL ,Z21_IDENT CODIGO,Z21_LOCAL "LOCAL",Z21_LOCALI ENDERECO,
+					Z21_PROD PRODUTO,Z21_QUANT PREVISTO, 0 REALIADO, Z21_NRCONT CONTAGEM  
+			FROM %TABLE:Z21% Z21 (NOLOCK)
+			WHERE Z21_FILIAL = %EXP:XFILIAL('Z21')% AND Z21_IDENT = %EXP:_xIdent% AND Z21.D_E_L_E_T_=' ' 
+		) A
+		JOIN %TABLE:Z06% Z06 (NOLOCK) ON Z06_FILIAL = %EXP:XFILIAL('Z06')% AND Z06_NUMOS=CODIGO AND Z06_NRCONT=CONTAGEM AND Z06_STATUS NOT IN ('CA','AG') AND Z06.D_E_L_E_T_=' '
+		GROUP BY FILIAL, CODIGO, LOCAL, ENDERECO, PRODUTO, CONTAGEM
+		HAVING SUM(PREVISTO) <> SUM(REALIZADO)
+		ORDER BY FILIAL, CODIGO, LOCAL, ENDERECO, PRODUTO,CONTAGEM
+	EndSql
+	
+	
+	(_xAlias2)->(dbclosearea())
+
+	cNomeArqD:=CriaTrab( _aStru, .T. )
+	dbUseArea(.T.,__LocalDriver,cNomeArqD,_xAlias,.T.,.F.)
+	SqlToTrb(getlastquery()[2], _aStru, _xAlias)
+
+	
+	aSize := MsAdvSize()
+	aObjects := {}
+	AAdd( aObjects, { 80, 80, .T., .T. } )
+	
+	aInfo := { aSize[ 1 ], aSize[ 2 ], aSize[ 3 ], aSize[ 4 ], 3, 3 }
+	aPosObj := MsObjSize( aInfo, aObjects )
+	
+	
+		
+	IndRegua(_xAlias,FileNoExt(cNomeArqD),"FILIAL+CODIGO+PRODUTO+LOCAL+ENDERECO",,,"Selecionando Registros...")
+	
+	
+	aCores := {}
+	aAdd(_aCores,{_xAlias+"->STATUS == '0'","BR_VERDE"	})
+	aAdd(_aCores,{_xAlias+"->STATUS == '1'","BR_AMARELO"	})
+	aAdd(_aCores,{_xAlias+"->STATUS == '2'","BR_VERMELHO"})
+	
+	If((_xAlias)->(EOF()))
+		msginfo('Nenhum registro com divergência de quantidade.','Consulta de Divergêcias')
+	Else
+		DEFINE MSDIALOG _oDlg TITLE "Divergência de Saldo de Produtos" From aSize[7],0 To aSize[6],aSize[5] PIXEL
+		DbSelectArea(_xAlias)
+		
+		/*
+		(_xAlias)->(DbGotop())
+		While((_xAlias)->(!EOF()))
+			msgalert((_xAlias)->(recno()),'teste')
+			(_xAlias)->(dbskip())
+		EndDo*/
+		
+		
+		(_xAlias)->(DbGotop())
+		
+		//Cria a MsSelect
+		_oMark := MsSelect():New(_xAlias,"OK","",_aCpoBro,@_lInverte,@_cMark,{aPosObj[1,1]+030,aPosObj[1,2],aPosObj[1,3],aPosObj[1,4]},,,,,_aCores)
+		//_oMark:bMark := {|| Disp()} 
+		_oMark:oBrowse:lHasMark		  := .T.
+		_oMark:oBrowse:lCanAllmark	  := .T.
+		_oMark:oBrowse:lAdjustColSize := .T.
+		_oMark:oBrowse:lJustific      := .F.
+		_oMark:bAval 				  := {|| RMark(.F.,_xAlias)}
+		_oMark:oBrowse:bAllMark 	  := {|| RMarkAll(_xAlias)}
+		//Exibe a Dialog
+		ACTIVATE MSDIALOG _oDlg CENTERED ON INIT EnchoiceBar(_oDlg,{|| nOpcA:=1, _oDlg:End()},{|| _oDlg:End()})
+		//Fecha a Area e elimina os arquivos de apoio criados em disco.
+		//(_xAlias)->(DbCloseArea())
+		Iif(File(cNomeArqD + GetDBExtension()),FErase(cNomeArqD  + GetDBExtension()) ,Nil)
+	EndIf
+	/*
+	_oDlg := TDialog():New(aSize[7],0,aSize[6],aSize[5],"Baixas Parciais em Lote" ,,,,,,,,,.T.,,,,,)
+_oDlg:lCentered := .T.
+_oDlg:bInit     := EnchoiceBar(_oDlg, {|| nOpcA:=1, _oDlg:End() },{|| _oDlg:End()},,aButtons)
+	*/
+
+	If nOpcA == 1 
+		sfCompPR() 
+	Endif
+
+	(_xAlias)->(DbCloseArea())
+	RestArea(_aArea)
+
+
+Return _lRet
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³R515MarkAll³ Autor ³Andre Sakai           ³ Data ³ 18/08/17 ³±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Marca todos os itens                                        º±±
+±±º          ³                                                            º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ FINAT022                                                   º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function RMarkAll(cAlias)
+
+Local nRecno := Recno()
+Local lRet   := .T.
+
+dbSelectArea(cAlias)
+dbGoTop()
+
+While !Eof()
+	RMark(.T.,cAlias)
+	DbSkip()	
+Enddo
+
+DbGoto(nRecno)
+
+_oMark:oBrowse:Refresh()
+
+Return(lRet)
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³R515MARK  ºAutor  ³Edinei Sanchez Milekº Data ³  12/09/11   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Marca item                                                  º±±
+±±º          ³                                                            º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ FINAT022                                                   º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+Static Function RMark(lAll,cAlias)
+
+Local nRecno:=(cAlias)->(Recno())
+Local lRet  := .T.
+
+lAll:=If(lAll==Nil,.F.,lAll)
+
+If !lAll
+	If !IsMark("OK",_cMark)
+		RecLock(cAlias,.F.)
+		(cAlias)->OK := _cMark
+		MsUnLock()
+	Else	
+		RecLock(cAlias,.F.)
+		(cAlias)->OK       := ' '
+		MsUnLock()
+	Endif
+
+Else
+	(cAlias)->(dbGoTop())
+	While (cAlias)->(!Eof())
+		If !IsMark("OK",_cMark)
+			RecLock(cAlias,.F.)
+			(cAlias)->OK       := _cMark
+			(cAlias)->(MsUnLock())
+		Else
+			RecLock(cAlias,.F.)
+			(cAlias)->OK       := '  '
+			(cAlias)->(MsUnLock())
+		Endif
+		(cAlias)->(dbSkip())
+	Enddo
+Endif
+_oMark:oBrowse:Refresh()
+
+return lRet
+
 
 Static Function sfCompPR() 
 	
-	Local _xAlias  := getnextalias()
+	//Local _xAlias  := getnextalias()
 	Local _xAlias2 := getnextalias()
 	Local _xAlias3 := getnextalias()
 
 	Local _xIdent  := Z06->Z06_NUMOS//'075802'
 		
-		
+/*		
 	//Consuta para comparar produtos do inventário previsto / realizado 	
 	BeginSql Alias _xAlias
 		%noparser%
@@ -2348,6 +2573,11 @@ Static Function sfCompPR()
 	
 	CopytoClipboard (GETLASTQUERY()[2])
 	MSGINFO(GETLASTQUERY()[2],'TWMSA021')
+*/
+	
+	((_xAlias)->(DBGoTop()))
+	set filter to OK <>'  '
+	((_xAlias)->(DBGoTop()))
 	
 	If((_xAlias)->(EOF()))
 		If(Z06->Z06_STATUS $ 'EX')
@@ -2361,7 +2591,65 @@ Static Function sfCompPR()
 		_ni :=0
 		While((_xAlias)->(!EOF()))
 			//msgalert(cvaltochar(++_ni),'entrou')
-			If((_xAlias)->SUM_PREV > (_xAlias)->SUM_REAL ) //produtos não encontrados
+			If((_xAlias)->SUMPREV > (_xAlias)->SUMREAL ) //produtos não encontrados
+
+				BeginSQL ALIAS _xAlias2
+					%noparser%
+					SELECT 	Z21_QUANT,COALESCE(Z16_QUANT,0) Z16_QUANT, COALESCE(Z16_SALDO,0) Z16_SALDO, Z21_FILIAL,Z21_PROD,Z21_LOCAL,Z21_PRIOR,Z21_LOCALI,Z21_NUMSER,Z21_LOTE,Z21_NUMLOT,
+							Z21_QUANT,Z21_ESTFIS,Z21_IDENT,Z21_NRCONT,Z21_ETQPAL,Z21_ETQPAL,Z21_ETQPRD,Z21_ETQVOL,Z21_ETQCLI,Z21_NUMSEQ   
+					FROM %TABLE:Z21% Z21 (NOLOCK)
+					JOIN %TABLE:Z06% Z06 (NOLOCK) ON Z06_FILIAL = %EXP:XFILIAL('Z06')% AND Z06_NUMOS=Z21_IDENT AND Z06_NRCONT=Z21_NRCONT AND Z06_STATUS NOT IN ('CA','AG') AND Z06.D_E_L_E_T_=' '
+					LEFT JOIN %TABLE:Z16% Z16 (NOLOCK) ON 	Z16_FILIAL=Z21_FILIAL AND Z16_CODPRO=Z21_PROD AND Z16_LOCAL=Z21_LOCAL AND 
+															Z16_ENDATU=Z21_LOCALI AND Z16_ETQPAL=Z21_ETQPAL AND Z16_ETQCLI=Z21_ETQCLI AND 
+															Z16_ETQVOL=Z21_ETQVOL AND Z16.D_E_L_E_T_=' '
+					WHERE Z21_FILIAL=%EXP:(_xAlias)->FILIAL%
+							AND Z21_IDENT=%EXP:(_xAlias)->CODIGO%
+							AND Z21_PROD=%EXP:(_xAlias)->PRODUTO% 
+							AND Z21_LOCAL=%EXP:(_xAlias)->LOCAL% 
+							AND Z21_LOCALI=%EXP:(_xAlias)->ENDERECO%
+							AND Z21.D_E_L_E_T_=' '
+				ENDSQL
+				
+				
+				//CopytoClipboard (GETLASTQUERY()[2])
+				//msginfo(GETLASTQUERY()[2],'TWMSA021 2')
+	
+	
+				While((_xAlias2)->(!EOF()))		
+					//verifica saldo na SBF - transfere para ARMAZEM 'LOST' e corrige saldo na Z16
+						
+					//transfere diferença para ARMAZEM 'LOST' e corrige SALDOS nas tabela customizada Z16
+					aLista := { {;
+								'SAMSDC6009002                 ',;	//produto origem
+								'SAMSDC6009002                 ',;	//produto destino
+								7,; //quantidade
+								'01',; //local Origem
+								'01',; //local Destino
+								'53A050418772   ',; //Endereco Origem
+								'53A050518773   ',; //Local Destino
+								'',; // Numero serie //D3_NUMSERI
+								'',; // Lote Origem //D3_LOTECTL
+								'',; // sublote origem // D3_NUMLOTE
+								'',;//data validade // D3_DTVALID
+								'',;//data validade // D3_ZNUMOS
+								'';//data validade // D3_ZSEQOS
+								} } //Os produtos a serem utilizados
+				
+					//MSGALERT(VARINFO('aLista',aLista),'UF021T')
+							
+					if(sfMata261(aLista))
+						//transferencia realizada
+						_lRet := .T.
+					else
+						_lRet := .F.
+						//erro ao realizar transferencia, favor verificar saldos
+					endif
+					
+				
+				(_xAlias2)->(DBSKIP())
+				EndDo
+				
+				
 				
 				//msgalert('123','entrou 1')
 				//msginfo('Verificar transferências do produto para encontrar possível divergência','saldo maior que o estoque')
@@ -2376,7 +2664,7 @@ Static Function sfCompPR()
 				
 				 
 				
-			ElseIf((_xAlias)->SUM_REAL > (_xAlias)->SUM_PREV ) // produtos encontrados a mais
+			ElseIf((_xAlias)->SUMREAL > (_xAlias)->SUMPREV ) // produtos encontrados a mais
 				//msgalert('123','entrou 2')
 				
 				//msginfo('Verificar transferências do produto para encontrar possível divergência','esoque maior que o saldo')
@@ -2434,9 +2722,10 @@ Static Function sfCompPR()
 								EndIf
 							Else
 							
-								If(msgyesno('','')
+								If(msgyesno('Deseja atualizar o saldo do produto '+(_xAlias2)->Z21_PROD+' no endereço '+(_xAlias2)->Z21_LOCALI,'Atualizar saldo do produto?'))
 									//TODO - validar geração de z16
-							
+									msgalert('Em desenvolvimento','chamada rotina de transferência 2')
+							/*
 									dbSelectArea("Z16")
 									RecLock("Z16",.F.)
 										Z16->Z16_FILIAL	:= xFilial("Z16")
@@ -2444,7 +2733,7 @@ Static Function sfCompPR()
 										//Z16->Z16_PLTORI := (_xAlias2)->Z21_PLTORI
 										//Z16->Z16_UNITIZ	:= (_xAlias2)->Z21_UNITIZ
 										Z16->Z16_ETQPRD	:= (_xAlias2)->Z21_ETQPRD
-										Z16->Z16_CODPRO	:= (_xAlias2)->Z21_PRODUT
+										Z16->Z16_CODPRO	:= (_xAlias2)->Z21_PROD
 										Z16->Z16_QUANT	:= (_xAlias2)->Z21_QUANT
 										Z16->Z16_QTSEGU := (_xAlias2)->Z21_QTSEGU
 										Z16->Z16_SALDO  := (_xAlias2)->Z21_QUANT
@@ -2469,7 +2758,9 @@ Static Function sfCompPR()
 										Z16->Z16_VLDLOT := StoD((_xAlias2)->Z21_VLDLOT)
 										Z16->Z16_NUMSER := (_xAlias2)->Z21_NUMSER
 										Z16->Z16_DTSERI := StoD((_xAlias2)->Z21_DTSERI)
-									Z16->(MsUnLock())									
+									Z16->(MsUnLock())		
+									
+									*/							
 								EndIf
 								
 							EndIf
@@ -2497,7 +2788,7 @@ Static Function sfCompPR()
 				
 				//COMPARA SALDO DO PRODUTO COM SBF
 				If((_xAlias3)->(!EOF()))
-					If((_xAlias3)->BF_QUANT <> (_xAlias)->SUM_REAL)//SALDO DA SBF DIVERGENTE - DESEJA CORRIGIR
+					If((_xAlias3)->BF_QUANT <> (_xAlias)->SUMREAL)//SALDO DA SBF DIVERGENTE - DESEJA CORRIGIR
 						_lSaldBF := .T.
 						If(msgyesno('Saldo do produto '+cvlatochar((_xAlias2)->BF_PRODUTO)+' no endereço '+cvlatochar((_xAlias2)->Z21_ETQVOL)+;
 						' deve ser corrigdo? 	')	)						
@@ -2517,8 +2808,9 @@ Static Function sfCompPR()
 		EndDo
 			
 	EndIf
-	
-	(_xAlias)->(DBCloseArea())
+	DBSELECTAREA(_xAlias)
+	SET FILTER TO
+//	(_xAlias)->(DBCloseArea())
 	/*
 	While((_xAlias)->(!EOF()))
 		CONOUT((_xAlias)->(FILIAL+' '+CODIGO+' '+LOCAL+' '+ENDERECO+' '+PRODUTO)+CVALTOCHAR((_xAlias)->SUM_PREV)+CVALTOCHAR((_xAlias)->SUM_REAL))
@@ -2625,273 +2917,182 @@ Else
  
  
  
- Exemplo de Inclusão
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-#Include 'Protheus.ch'
-#Include 'FWMVCDef.ch'
- 
-User Function m311raut()
-Local aArea := GetArea()
-Local aDadoscab     := {}
-Local aDadosIte     := {}
-Local aItens := {}
- 
-Private oModel      := Nil
-Private lMsErroAuto := .F.
- 
-// RpcSetEnv("T1","D MG 01")  //comentar se via menu
- 
-oModel  := FwLoadModel ("MATA311")
- 
-//Adicionando os dados do ExecAuto cab
-aAdd(aDadoscab, {"NNS_FILIAL", 'D MG 01' , Nil})
-aAdd(aDadoscab, {"NNS_COD", '0000000041' , Nil})
-aAdd(aDadoscab, {"NNS_DATA", CTOD('20/03/2018'), Nil})
-aAdd(aDadoscab, {"NNS_SOLICT", '000000' , Nil})
-aAdd(aDadoscab, {"NNS_CLASS", '1' , Nil})
-aAdd(aDadoscab, {"NNS_ESPECI", ' ' , Nil})
- 
-//Adicionando os dados do ExecAuto Item
-aAdd(aDadosIte, {"NNT_FILIAL" , 'D MG 01' , Nil})
-aAdd(aDadosIte, {"NNT_FILORI" , 'D MG 01' , Nil})
-aAdd(aDadosIte, {"NNT_PROD"  , '6720' , Nil})
-aAdd(aDadosIte, {"NNT_LOCAL" , '01' , Nil})
-aAdd(aDadosIte, {"NNT_LOCALI" , 'AA1' , Nil})
-aAdd(aDadosIte, {"NNT_QUANT" , 1 , Nil})
-aAdd(aDadosIte, {"NNT_FILDES" , 'D MG 01' , Nil})
-aAdd(aDadosIte, {"NNT_PRODD" , '6720' , Nil})
-aAdd(aDadosIte, {"NNT_LOCLD" , '02' , Nil})
- 
-//no item o array precisa de um nivel superior.
-aAdd(aItens,aDadosIte)
- 
-//Chamando a inclusão - Modelo 1
-lMsErroAuto := .F.
- 
-FWMVCRotAuto( oModel,"NNS",3,{{"NNSMASTER", aDadoscab},{"NNTDETAIL", aItens}})
- 
-//Se houve erro no ExecAuto, mostra mensagem
-If lMsErroAuto
-     MostraErro()
-//Senão, mostra uma mensagem de inclusão
-Else
-     MsgInfo("Registro incluido!", "Atenção")
-EndIf
- 
-RestArea(aArea)
- 
-Return Nil
-Exemplo de Efetivação
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-#Include 'Protheus.ch'
-#Include 'FWMVCDef.ch'
- 
- 
-User Function m311efet()
-Local cFilOri     := "D MG 01 "
-Local cNNSCod     := "0000000042"
-Local aDadoscab   := {} 
-Local aDadosIte := {}
-Local aItens    := {}
- 
-Private oModel          := NIL
-Private cOpId311  := "011" //Operação Indicada para EFETIVAÇÃO
-  
-RpcSetEnv("T1","D MG 01")  //comentar se via menu 
- 
-oModel  := FwLoadModel ("MATA311") 
- 
-aRotina := {} 
- 
-NNS->(DbSetOrder(1))
-NNS->(DbSeek(xFilial("NNS",cFilOri) + cNNSCOD)) 
- 
-lMsErroAuto := .F. 
- 
-aAdd(aDadoscab, {"NNS_CLASS", '1' , Nil})
-aAdd(aDadoscab, {"NNS_COD", CNNSCod , Nil}) 
- 
- 
-aAdd(aDadosIte, {"NNT_SERIE" , '1  ' , Nil}) // Para Efetivação é OBRIGATÓRIO enviar a série a ser utilizada no Documento de Saída
-aAdd(aItens,aDadosIte)
- 
-FWMVCRotAuto( oModel,"NNS",4,{{"NNSMASTER", aDadoscab},{"NNTDETAIL", aItens}})
- 
-//Se houve erro no ExecAuto, mostra mensagem
-If lMsErroAuto
-     MostraErro()
-//Senão, mostra uma mensagem de efetivação
-Else
-     MsgInfo("Efetivado!", "Atenção")
-EndIf
- 
-Return Nil
-Exemplo de Alteração
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-#Include 'Protheus.ch'
-#Include 'FWMVCDef.ch'
- 
-User Function m311efet()
-Local cFilOri     := "D MG 01 "
-Local cNNSCod     := "0000000042"
-Local aDadoscab   := {} 
- 
-Private oModel          := NIL
-Private cOpId311  := "004" //Operação Indicada para ALTERAÇÃO
-  
-RpcSetEnv("T1","D MG 01")  //comentar se via menu 
- 
-oModel  := FwLoadModel ("MATA311") 
- 
-aRotina := {} 
- 
-NNS->(DbSetOrder(1))
-NNS->(DbSeek(xFilial("NNS",cFilOri) + cNNSCOD)) 
- 
-lMsErroAuto := .F. 
- 
-aAdd(aDadoscab, {"NNS_CLASS", '2' , Nil})
-aAdd(aDadoscab, {"NNS_COD", CNNSCod , Nil}) 
- 
-FWMVCRotAuto( oModel,"NNS",4,{{"NNSMASTER", aDadoscab}}) 
- 
-//Se houve erro no ExecAuto, mostra mensagem
-If lMsErroAuto
-     MostraErro()
-//Senão, mostra uma mensagem de efetivação
-Else
-     MsgInfo("Efetivado!", "Atenção")
-EndIf
- 
-Return Nil
 */
+
+USER FUNCTION UF021T()
+Local aLista := {}
+Local _lRet := .T.
+
+	aLista := { {;
+				'SAMSDC6009002                 ',;	//produto origem
+				'SAMSDC6009002                 ',;	//produto destino
+				7,; //quantidade
+				'01',; //local Origem
+				'01',; //local Destino
+				'53A050418772   ',; //Endereco Origem
+				'53A050518773   ',; //Local Destino
+				'',; // Numero serie //D3_NUMSERI
+				'',; // Lote Origem //D3_LOTECTL
+				'',; // sublote origem // D3_NUMLOTE
+				'',;//data validade // D3_DTVALID
+				'',;//data validade // D3_ZNUMOS
+				'';//data validade // D3_ZSEQOS
+				} } //Os produtos a serem utilizados
+
+	//MSGALERT(VARINFO('aLista',aLista),'UF021T')
+			
+	if(sfMata261(aLista))
+		//transferencia realizada
+		_lRet := .T.
+	else
+		_lRet := .F.
+		//erro ao realizar transferencia, favor verificar saldos
+	endif
+	//MSGALERT('APOS sfMata261','UF021T')
+
+/*
+    aadd(aLinha,{"D3_NUMSERI", "", Nil}) //Numero serie
+    aadd(aLinha,{"D3_LOTECTL", "", Nil}) //Lote Origem
+    aadd(aLinha,{"D3_NUMLOTE", "", Nil}) //sublote origem
+    aadd(aLinha,{"D3_DTVALID", '', Nil}) //data validade
+*/
+Return _lRet
+
+Static Function sfMata261(aLista)
+Local aAuto := {}
+Local aItem := {}
+Local aLinha := {}
+/*
+É necessario que:
+O parametro MV_LOCALIZ = S
+O produto com codigo PA001 tenha controle de endereco ativo
+O armazem padrao definido no produto deve ter 2 endereços: ENDER01 e ENDER02 
+Saldo inicial igual ou superior a 1
+E este saldo deve ser enderecçado ao ENDER01
+*/
+//Local aLista := {'PA001','PA001'} //Os produtos a serem utilizados
+Local nX
+Local nOpcAuto := 0
+Local cDocumen := ""
+Local lEstorno := .F.
+Local aArea :=  getArea()
+Local _lRet :=  .F.
+
+Private lMsErroAuto := .F.
+
+//MSGALERT('ENTROU sfMata261','UF021T')
+//conout("Exemplo de inclusão de movimentação multipla")
+
+//Cabecalho a Incluir
+cDocumen := GetSxeNum("SD3","D3_DOC")
+aadd(aAuto,{cDocumen,dDataBase}) //Cabecalho
+
+//Itens a Incluir
+aItem := {}
+
+for nX := 1 to len(aLista)// step 1
+    aLinha := {}
+    //Origem
+    SB1->(DbSeek(xFilial("SB1")+PadR(aLista[nX][1], tamsx3('D3_COD') [1])))
+    aadd(aLinha,{"ITEM",'00'+cvaltochar(nX),Nil})
+    aadd(aLinha,{"D3_COD", SB1->B1_COD, Nil}) //Cod Produto origem
+    aadd(aLinha,{"D3_DESCRI", SB1->B1_DESC, Nil}) //descr produto origem
+    aadd(aLinha,{"D3_UM", SB1->B1_UM, Nil}) //unidade medida origem
+    aadd(aLinha,{"D3_LOCAL", aLista[nX][4], Nil}) //armazem origem
+    aadd(aLinha,{"D3_LOCALIZ", PadR(aLista[nX][5], tamsx3('D3_LOCALIZ') [1]),Nil}) //Informar endereÃ§o origem
+    
+    //Destino
+    SB1->(DbSeek(xFilial("SB1")+PadR(aLista[nX][2], tamsx3('D3_COD') [1])))
+    aadd(aLinha,{"D3_COD", SB1->B1_COD, Nil}) //cod produto destino
+    aadd(aLinha,{"D3_DESCRI", SB1->B1_DESC, Nil}) //descr produto destino
+    aadd(aLinha,{"D3_UM", SB1->B1_UM, Nil}) //unidade medida destino
+    aadd(aLinha,{"D3_LOCAL", aLista[nX][5], Nil}) //armazem destino
+    aadd(aLinha,{"D3_LOCALIZ", PadR(aLista[nX][7], tamsx3('D3_LOCALIZ') [1]),Nil}) //Informar endereÃ§o destino
+    
+    aadd(aLinha,{"D3_NUMSERI", aLista[nX][8], Nil}) //Numero serie
+    aadd(aLinha,{"D3_LOTECTL", padr(aLista[nX][9],tamsx3('D3_LOTECTL') [1])/*aLista[nX+8]*/, Nil}) //Lote Origem
+    aadd(aLinha,{"D3_NUMLOTE", aLista[nX][10], Nil}) //sublote origem
+    aadd(aLinha,{"D3_DTVALID", aLista[nX][11], Nil}) //data validade
+    aadd(aLinha,{"D3_POTENCI", 0, Nil}) // Potencia
+    aadd(aLinha,{"D3_QUANT", aLista[nX][3], Nil}) //Quantidade
+    aadd(aLinha,{"D3_QTSEGUM", 0, Nil}) //Seg unidade medida
+    aadd(aLinha,{"D3_ESTORNO", "", Nil}) //Estorno
+    aadd(aLinha,{"D3_NUMSEQ", "", Nil}) // Numero sequencia D3_NUMSEQ
+    
+    aadd(aLinha,{"D3_LOTECTL", padr(aLista[nX][9],tamsx3('D3_LOTECTL') [1])/*aLista[nX+8]*/, Nil}) //Lote destino
+    aadd(aLinha,{"D3_NUMLOTE", aLista[nX][10], Nil}) //sublote destino
+    aadd(aLinha,{"D3_DTVALID", aLista[nX][11], Nil}) //validade lote destino
+    aadd(aLinha,{"D3_ITEMGRD", "", Nil}) //Item Grade
+    
+    /* CAMPOS CONFORME ROTINA DE TRANSFERENCIA MATA261*/
+//    aadd(aLinha,{"D3_IDDCF", "", Nil}) //Item Grade
+//    aadd(aLinha,{"D3_ZNUMOS", "", Nil}) //Item Grade
+//    aadd(aLinha,{"D3_ZSEQOS", "", Nil}) //Item Grade
+//    aadd(aLinha,{"D3_ZETQPLT", "", Nil}) //Item Grade
+
+
+    aAdd(aAuto,aLinha)
+    
+    	
+	//CopytoClipboard (VARINFO('aAuto',aAuto))
+    //msgalert('log de erro informações mata261','sd3')
+    
+Next nX
+nOpcAuto := 3 // Inclusao
+
+
+
+MSExecAuto({|x,y| mata261(x,y)},aAuto,nOpcAuto)
+
+if lMsErroAuto
+	//msgalert('erro','execauto mata261')
+    MostraErro()
+    lEstorno := .F.
+    _lRet := .F.
+else
+    //msgalert('ok','execauto mata261')
+    msgalert("Inclusão de movimentação multipla efetuada com sucesso",'teste transferencia')
+    conout('Tranferencia - Correção de saldo Inventário - '+DTOC(SD3->D3_EMISSAO))
+    CONOUT('SD3','D3_NUMSEQ: '+SD3->D3_NUMSEQ)
+    lEstorno := .F.
+    _lRet := .T.
+EndIf
+
+msgalert("Finalizado a inclusão de movimentação multipla",'teste transferencia')
+/*
+If lContinua
+
+    //
+    conout("Exemplo de estorno de movimentação multipla baseado na inclusão do movimentação multipla anterior")
+
+    lMsErroAuto := .F.
+    for nX := 1 to len(aLista) step 2
+    
+        //-- Preenchimento dos campos
+        aAuto := {}
+        aadd(aAuto,{"D3_DOC", cDocumen, Nil})
+        aadd(aAuto,{"D3_COD", aLista[nX], Nil})
+        
+        DbSelectArea("SD3")
+        DbSetOrder(2)
+        DbSeek(xFilial("SD3")+cDocumen+aLista[nX])
+    
+        //-- Teste de Estorno
+        nOpcAuto := 6 // Estornar
+        MSExecAuto({|x,y| mata261(x,y)},aAuto,nOpcAuto)
+        
+        If lMsErroAuto
+            MostraErro()
+        Else
+            conout("Estorno de movimentação multipla efetuada com sucesso")
+        EndIf
+
+    Next nX
+    conout("Finalizado a estorno de movimentação multipla")
+EndIf
+*/
+
+RestArea(aArea)
+
+
+Return
