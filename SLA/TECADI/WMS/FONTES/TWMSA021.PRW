@@ -1079,7 +1079,7 @@ Static Function sfInfoServ(mvNumOs)
 	TButton():New( 006, 350, "Gerar Relatório p/ assinar (Auditoria)"   , _oPnlRodape,{|| MsgRun("Abrindo Relatório...", "Aguarde...", {|| CursorWait(), sfReport2()    , CursorArrow()}) },100,010,,,.F.,.T.,.F.,,.F.,,,.F. )
 	TButton():New( 006, 456, "Verificar Divergencias"   , _oPnlRodape,{|| MsgRun("Verificando...", "Aguarde...", {|| CursorWait(), sfPreComPR()    , CursorArrow()}) },060,010,,,.F.,.T.,.F.,,.F.,,,.F. )
 	TButton():New( 006, 522, "Cancelar"            , _oPnlRodape,{|| _oDlgDetInvent:END() },060,010,,,.F.,.T.,.F.,,.F.,,,.F. )
-	TButton():New( 006, 588, "advplexec"   , _oPnlRodape,{|| U_ADVPLEXEC()},060,010,,,.F.,.T.,.F.,,.F.,,,.F. )	
+//	TButton():New( 006, 588, "advplexec"   , _oPnlRodape,{|| U_ADVPLEXEC()},060,010,,,.F.,.T.,.F.,,.F.,,,.F. )	
 
 	// ativa a tela
 	ACTIVATE MSDIALOG _oDlgDetInvent CENTERED
@@ -3074,7 +3074,7 @@ Static Function sfCompPR()
 							AND Z19_CONTAG=(SELECT MAX(Z19A.Z19_CONTAG) FROM Z19010 Z19A (NOLOCK) WHERE Z19A.Z19_FILIAL=Z19.Z19_FILIAL	AND Z19A.Z19_IDENT=Z19.Z19_IDENT AND Z19A.Z19_LOCAL=Z19.Z19_LOCAL AND 	Z19A.Z19_ENDERE=Z19.Z19_ENDERE AND 	Z19A.Z19_CODPRO=Z19.Z19_CODPRO AND Z19A.D_E_L_E_T_=' '	)
 				*/
 				
-				CopytoClipboard (GETLASTQUERY()[2])
+				//CopytoClipboard (GETLASTQUERY()[2])
 //				msginfo(GETLASTQUERY()[2],'TWMSA021 2')
 	
 	
@@ -3237,23 +3237,26 @@ Static Function sfCompPR()
 				
 				EndSQL
 				
-				copytoclipboard(getlastquery()[2])
+				//copytoclipboard(getlastquery()[2])
 				//msgalert('teste',' previsto > realizado -- else')
 				//Caixas sem etiqueta no item do produto
 //				msginfo('Saldo do estoque igual ao do inventário. Ocorrência de divergência de volumes serão tratadas posteriormente.','Verificar Divergências')
-				aAdd(_aReg,{'2',{	(_xAlias)->FILIAL,; //[1]
-									(_xAlias)->CODIGO,; //[2]
-									(_xAlias)->LOCAL,; //[3]
-									(_xAlias)->ENDERECO,; //[4]
-									(_xAlias)->PRODUTO,; //[5]
-									(_xAlias)->SUMPREV,; //[6]
-									(_xAlias2)->Z19_QUANT,; //[7]
-									(_xAlias2)->Z16_SALDO,; //[8]
-									(_xAlias2)->Z16REC; //[8]
-									},'Verificar Volumes <!-- 01 -->'})
-				reclock(_xAlias,.f.)
+				While((_xAlias2)->(!EOF()))
+					aAdd(_aReg,{'2',{	(_xAlias)->FILIAL,; //[1]
+										(_xAlias)->CODIGO,; //[2]
+										(_xAlias)->LOCAL,; //[3]
+										(_xAlias)->ENDERECO,; //[4]
+										(_xAlias)->PRODUTO,; //[5]
+										(_xAlias)->SUMPREV,; //[6]
+										(_xAlias2)->Z19_QUANT,; //[7]
+										(_xAlias2)->Z16_SALDO,; //[8]
+										(_xAlias2)->Z16REC; //[8]
+										},'Verificar Volumes <!-- 01 -->'})
+					(_xAlias2)->(DBSkip())
+				EndDo
+				RecLock(_xAlias,.f.)
 					(_xAlias)->STATUS := '2'
-				(_xAlias)->(msunlock())
+				(_xAlias)->(MsUnlock())
 			EndIf
 	
 			(_xAlias)->(DbSkip())
