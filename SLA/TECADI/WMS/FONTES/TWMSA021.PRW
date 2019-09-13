@@ -2287,7 +2287,7 @@ Static Function sfReport2()
 
 Return
 
-
+//Rotina de Divergências - Lista as Divergencias de quantidade entre previso e realizado 
 Static Function sfPreComPR()
 	Local _xAlias2 := getnextalias()
 	Local _aArea := getArea()
@@ -2344,7 +2344,7 @@ Static Function sfPreComPR()
 	/*
 	BeginSql Alias _xAlias2
 		%noparser%
-		SELECT '  ' OK, FILIAL, CODIGO, LOCAL, ENDERECO, PRODUTO, SUM(COALESCE(PREVISTO,0)) SUMPREV, SUM(COALESCE(REALIZADO,0)) SUMREAL, CONTAGEM, '3' STATUS,
+		SELECT '  ' OK, FILIAL, CODIGO, LOCAL, ENDERECO, PRODUTO, SUM(PREVISTO) SUMPREV, SUM(REALIZADO) SUMREAL, CONTAGEM, '3' STATUS,
 		(	SELECT 	SUM(Z16_SALDO) 
 			FROM 	Z16010 Z16A (NOLOCK) 
 			WHERE 	Z16_FILIAL=FILIAL AND Z16_LOCAL=LOCAL AND Z16_ENDATU=ENDERECO AND 
@@ -2373,13 +2373,19 @@ Static Function sfPreComPR()
 		) A
 		JOIN %TABLE:Z06% Z06 (NOLOCK) ON Z06_FILIAL = FILIAL AND Z06_NUMOS=CODIGO AND Z06_STATUS NOT IN ('CA','AG') AND Z06.D_E_L_E_T_=' '
 		GROUP BY FILIAL, CODIGO, LOCAL, ENDERECO, PRODUTO, CONTAGEM
-		HAVING SUM(COALESCE(PREVISTO,0)) <> SUM(COALESCE(REALIZADO,0))
+		HAVING SUM(PREVISTO) <> SUM(REALIZADO)
 		ORDER BY FILIAL, CODIGO, LOCAL, ENDERECO, PRODUTO,CONTAGEM
 	EndSql
 	
 	//copytoclipboard(getlastquery()[2])
 	
 	(_xAlias2)->(dbclosearea())
+
+	cNomeArqD:=CriaTrab( _aStru, .T. )
+	dbUseArea(.T.,__LocalDriver,cNomeArqD,_xAlias,.T.,.F.)
+	
+	SqlToTrb(getlastquery()[2], _aStru, _xAlias)
+	
 	*/
 	oConfDiv := TWMSA21A():NEW(Z06->Z06_FILIAL,Z06->Z06_LOCAL,Z06->Z06_NUMOS)
 	
@@ -2390,56 +2396,49 @@ Static Function sfPreComPR()
 
 	for _nI := 1 to len(oDiv)
 		RecLock(_xAlias,.T.)
-			(_xAlias)->OK := oDiv[_nI]:OK
-			(_xAlias)->FILIAL := oDiv[_nI]:FILIAL
-			(_xAlias)->CODIGO := oDiv[_nI]:IDENT
-			(_xAlias)->LOCAL := oDiv[_nI]:LOCALI
+			(_xAlias)->OK 		:= oDiv[_nI]:OK
+			(_xAlias)->FILIAL 	:= oDiv[_nI]:FILIAL
+			(_xAlias)->CODIGO 	:= oDiv[_nI]:IDENT
+			(_xAlias)->LOCAL 	:= oDiv[_nI]:LOCALI
 			(_xAlias)->ENDERECO := oDiv[_nI]:ENDERECO
-			(_xAlias)->PRODUTO := oDiv[_nI]:PRODUTO
-			(_xAlias)->SUMPREV := oDiv[_nI]:PREVISTO
-			(_xAlias)->SUMREAL := oDiv[_nI]:REALIZADO
+			(_xAlias)->PRODUTO	:= oDiv[_nI]:PRODUTO
+			(_xAlias)->SUMPREV	:= oDiv[_nI]:PREVISTO
+			(_xAlias)->SUMREAL	:= oDiv[_nI]:REALIZADO
 			(_xAlias)->CONTAGEM := oDiv[_nI]:CONTAGEM
-			(_xAlias)->STATUS := ''
+			(_xAlias)->STATUS 	:= ''
 		(_xAlias)->(msunlock())
 	
 	next
 
-	//SqlToTrb(getlastquery()[2], _aStru, _xAlias)
-
 	
+	
+
+	/*Calculo do tamanho da tela*/
 	aSize := MsAdvSize()
 	aObjects := {}
 	AAdd( aObjects, { 40, 80, .T., .T. } )
-	//AAdd( aObjects, { 40, 80, .T., .T. } )
 	
 	aInfo := { aSize[ 1 ], aSize[ 2 ], aSize[ 3 ], aSize[ 4 ], 3, 3 }
 	aPosObj := MsObjSize( aInfo, aObjects )
 	
 	
-		
+	//Ordenação da Grid encontrada por endereço	
 	IndRegua(_xAlias,FileNoExt(cNomeArqD),"FILIAL+CODIGO+PRODUTO+LOCAL+ENDERECO",,,"Selecionando Registros...")
 	
-	
+	//Cores das Legendas da primeira tela
 	aCores := {}
 	aAdd(_aCores,{_xAlias+"->STATUS == '0'","BR_VERDE"	})
 	aAdd(_aCores,{_xAlias+"->STATUS == '1'","BR_AMARELO"	})
 	aAdd(_aCores,{_xAlias+"->STATUS == '2'","BR_VERMELHO"})
 //	aAdd(_aCores,{_xAlias+"->STATUS == ' ') ","BR_CINZA"})
 	
+	
 	If((_xAlias)->(EOF()))
 		msginfo('Nenhum registro com divergência de quantidade.','Consulta de Divergêcias')
 	Else
 		DEFINE MSDIALOG _oDlg TITLE "Divergência de Saldo de Produtos" From aSize[7],0 To aSize[6],aSize[5] PIXEL
 		DbSelectArea(_xAlias)
-		
-		/*
-		(_xAlias)->(DbGotop())
-		While((_xAlias)->(!EOF()))
-			msgalert((_xAlias)->(recno()),'teste')
-			(_xAlias)->(dbskip())
-		EndDo*/
-		
-		
+	
 		(_xAlias)->(DbGotop())
 
 		//Cria a MsSelect
@@ -2452,60 +2451,11 @@ Static Function sfPreComPR()
 		_oMark:bAval 				  := {|| RMark(.F.,_xAlias,_oMark)}
 		_oMark:oBrowse:bAllMark 	  := {|| RMarkAll(_xAlias,_oMark)}
 		//Exibe a Dialog
-//		ACTIVATE MSDIALOG _oDlg CENTERED ON INIT EnchoiceBar(_oDlg,{|| nOpcA:=1, _oDlg:End()},{|| _oDlg:End()})
-	/*
-		_aStru2	:=   {{"OK"	    ,"C",02,0},;
-				  { "FILIAL","C",TamSX3('Z19_FILIAL')[1],0},;
-				  { "CODIGO","C",TamSX3('Z19_IDENT')[1],0},;
-				  { "LOCAL","C",TamSX3('Z19_LOCAL')[1],0},;
-				  { "ENDERECO","C",TamSX3('Z19_ENDERE')[1],0},;
-				  { "PRODUTO","C",TamSX3('Z19_CONTAG')[1],0},;
-				  { "CONTAGEM","C",TamSX3('Z19_CODPRO')[1],0},;
-				  { "ETIQUETA","C",TamSX3('Z19_ETQVOL')[1],0},;
-				  { "PREVISTO","N",TamSX3('Z19_QUANT')[1],TamSX3('Z19_QUANT')[2]},;
-				  { "REALIZADO","N",TamSX3('Z19_QUANT')[1],TamSX3('Z19_QUANT')[2]},;
-				  { "CALCULADO","N",TamSX3('Z19_QUANT')[1],TamSX3('Z19_QUANT')[2]},;
-				  { "STATUS","C",1,0},;
-				  { "MENSAGEM","C",100,0}}
-	
-				  _aCpoBro2	:= {{ "OK"			,, "Mark"			,"@!"},;	
-					{ "FILIAL"		,, "Filial"			,"@!"},;
-					{ "CODIGO"		,, "OS"				,"@!"},;
-					{ "LOCAL"		,, "Armazem"		,"@!"},;
-					{ "ENDERECO"	,, "Endereco"		,"@!"},;
-					{ "PRODUTO"		,, "Produto"		,"@!"},;
-					{ "CONTAGEM" 	,,'CONTAGEM', pesqpict('Z19','Z19_CONTAG')},;
-					{ "ETIQUETA"	,,'ETIQUETA', pesqpict('Z19','Z19_QUANT')},;
-					{ "PREVISTO"	,,'PREVISTO',, pesqpict('Z19','Z19_QUANT')},;
-					{ "REALIZADO"	,,'REALIZADO', pesqpict('Z19','Z19_QUANT')},;
-					{ "CALCULADO"	,,'CALCULADO', pesqpict('Z19','Z19_QUANT')},;
-					{ "STATUS"		,,'STATUS','@!'},;
-					{ "MENSAGEM"	,,'MENSAGEM','@!'}}
-
-
-
-		
-		//Cria a MsSelect
-		_oMarkB := MsSelect():New(_xAliasB,"OK","",_aCpoBroB,@_lInverte,@_cMark,{aPosObj[2,1],aPosObj[2,2],aPosObj[2,3],aPosObj[2,4]},,,,,_aCores)
-		//_oMark:bMark := {|| Disp()} 
-		_oMarkB:oBrowse:lHasMark		  := .T.
-		_oMarkB:oBrowse:lCanAllmark	  := .T.
-		_oMarkB:oBrowse:lAdjustColSize := .T.
-		_oMarkB:oBrowse:lJustific      := .F.
-		_oMarkB:bAval 				  := {|| RMark(.F.,_xAlias,_oMark)}
-		_oMarkB:oBrowse:bAllMark 	  := {|| RMarkAll(_xAlias,_oMark)}
-		//Exibe a Dialog
-		
-		*/
 		ACTIVATE MSDIALOG _oDlg CENTERED ON INIT EnchoiceBar(_oDlg,{|| nOpcA:=1, _oDlg:End()},{|| _oDlg:End()})
 		
 		//(_xAlias)->(DbCloseArea())
 	EndIf
-	/*
-	_oDlg := TDialog():New(aSize[7],0,aSize[6],aSize[5],"Baixas Parciais em Lote" ,,,,,,,,,.T.,,,,,)
-_oDlg:lCentered := .T.
-_oDlg:bInit     := EnchoiceBar(_oDlg, {|| nOpcA:=1, _oDlg:End() },{|| _oDlg:End()},,aButtons)
-	*/
+
 
 	If nOpcA == 1 
 		sfCompPR() 
@@ -2606,14 +2556,15 @@ _oMarkX:oBrowse:Refresh()
 
 Return lRet
 
-
+//Função de consulta de Divergências - faz o tratamento para tela de Confirmação e Relatório 
 Static Function sfCompPR() 
 	
-	//Local _xAlias  := getnextalias()
+	//Local _xAlias  := getnextalias() // Alias Já Utilizado na função anterior  //
 	Local _xAlias2 := getnextalias()
 	Local _xAlias3 := getnextalias()
 	Local _xAlias4 := getnextalias()
-//	Local _xIdent  := Z06->Z06_NUMOS
+	
+	Local _nTSBF := 0
 	
 	Private _aConf := {}
 	
@@ -2634,17 +2585,14 @@ Static Function sfCompPR()
 	Else
 		While((_xAlias)->(!EOF()))
 			_nTela ++
-			//if((_xAlias)->OK='  ')
-			//	(_xAlias)->(DbSkip())
-			//	loop
-			//endif
+			_nTSBF := 0
 			
 			//Consulta saldo atual do produto no endereço informado
-			
 			If(SELECT(_xAlias2)<>0)
 				(_xAlias2)->(DBCLOSEAREA())
 			EndIf
 			
+			/*Verifica o saldo da Z16 para comparar com a Z19 - ignorar ocorrencias de volume*/
 			BeginSQL ALIAS _xAlias2
 				%noparser%
 				SELECT 	SUM(Z16_SALDO) AS SUMEST   
@@ -2659,10 +2607,8 @@ Static Function sfCompPR()
 			(_xAlias2)->(dbCloseArea())
 			
 			//aadd(_aReg,{'9',{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,0,0,0},'Entrou na validação'})
-			
 			//Adicionada validação de saldo atual para itens com etiqueta de numero de volume no estoque (Z16) e sem no Realizado (Z19) 
-			
-			msgalert('<html>Previsto:'+ transform((_xAlias)->SUMPREV,pesqpict('Z19','Z19_QUANT')) + ' <BR>Realizado' + transform((_xAlias)->SUMREAL,pesqpict('Z19','Z19_QUANT'))+ '<BR>Saldo Z16'+ transform(_nSaldoAt,pesqpict('Z19','Z19_QUANT')),'Divergencia')
+			//msgalert('<html>Previsto:'+ transform((_xAlias)->SUMPREV,pesqpict('Z19','Z19_QUANT')) + ' <BR>Realizado' + transform((_xAlias)->SUMREAL,pesqpict('Z19','Z19_QUANT'))+ '<BR>Saldo Z16'+ transform(_nSaldoAt,pesqpict('Z19','Z19_QUANT')),'Divergencia')
 			
 			If((_xAlias)->SUMPREV > (_xAlias)->SUMREAL .AND. _nSaldoAt <> (_xAlias)->SUMREAL)  
 				
@@ -2725,7 +2671,7 @@ Static Function sfCompPR()
 				
 				If((_xAlias2)->(EOF()))
 					//Previsto não encontrado
-					//Deseja transferir estoque para area de conferencia
+					//Deseja transferir estoque para area de quarentena?
 					
 					//verifica saldo na SBF para saber se movimenta estoque
 					BeginSQL Alias _xAlias4 
@@ -2735,19 +2681,20 @@ Static Function sfCompPR()
 								AND BF_LOCAL=%EXP:(_xAlias)->LOCAL% 
 								AND BF_LOCALIZ=%EXP:(_xAlias)->ENDERECO%
 								AND SBF.D_E_L_E_T_=' '
-								AND BF_QUANT >= %EXP:(_xAlias2)->Z19_QUANT%
+								AND BF_QUANT >= %EXP:(_xAlias2)->Z19_QUANT+_nTSBF%
 					EndSQL 
 					
-					_nSaldoSBF := 0
+					//_nSaldoSBF := 0
 					
 					If((_xAlias4)->(eof()))
 						//altera somente na Z16 - produto pode ser encontrado em outro endereço
 						
 						//Saldo na SBF não encontrada - transferir para Lost somente a Z16
-						_aItens := {(_xAlias2)->Z16REC,,(_xAlias)->ENDERECO}
-						aadd(_aConf,{'6',_aItens/*aItens vazio para não fazer transferencia*/,;
+						_aItens := {(_xAlias2)->Z16REC,(_xAlias)->ENDERECO,'LOST'}
+						aadd(_aConf,{'5',_aItens/*aItens vazio, não utiliza transferência*/,;
 									{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z19_QUANT,(_xAlias2)->Z19_QUANT,(_xAlias2)->Z16REC},;
-									'Realizar transferência para Quarentena 2?'})
+									'Realizar transferência para Quarentena (LOST)'+' - COD A11?'})
+						/* VERIFICAR TOTAL X PARCIAL*/
 					Else
 						//altera endereço para lost e transfere o produto
 						//msgalert('<html>'+'altera somente na Z16 - produto pode ser encontrado em outro endereço'+'<br>'+'','entrou 21')
@@ -2765,7 +2712,7 @@ Static Function sfCompPR()
 						EndSql
 						
 						If((_xAlias3)->(EOF()))
-							msgalert('entrou 21 1',cvaltochar(_nSaldoAt),'teste')
+							//msgalert('entrou 21 1',cvaltochar(_nSaldoAt),'teste')
 						
 							//produto não encontrado nas etiquetas - trasnferir para Quarentena LOST
 							
@@ -2775,16 +2722,38 @@ Static Function sfCompPR()
 								produto deve ser levado para a quarentena - etiqueta de volume não associada
 							*/
 							_aItens := {}
-							_aDados := {(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z19_QUANT,0,(_xAlias2)->Z16REC}
+							_aDados := {(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z21_QUANT,(_xAlias2)->Z19_QUANT,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z16REC}
 
-							//aADD(_aConf,{'3',_aItens,_aDados,'Produto não encontrado,Deseja transferir para Quarentena - Etiqueta e Estoque?'})
-							
+							aADD(_aConf,{'5',_aItens,_aDados,'Produto não encontrado,Deseja criar etiqueta na Quarentena? - Etiqueta e Estoque? A21'})
+							//A12
 							
 						Else
 							_aItens := {}
-							msgalert('entrou 21 2','teste')
-							//aADD(_aConf,{'3',_aItens,_aDados,'Produto não encontrado,Deseja transferir para Quarentena - Etiqueta e Estoque?'})
 							
+							aAdd(_aItens ,{	(_xAlias)->PRODUTO,;	//produto origem
+											(_xAlias)->PRODUTO,;	//produto destino
+											(_xAlias2)->Z19_QUANT,; //quantidade
+											(_xAlias)->LOCAL,; //local Origem
+											(_xAlias)->LOCAL,; //local Destino
+											(_xAlias)->ENDERECO,; //Endereco Origem
+											'LOST',; //Local Destino
+											'',; // Numero serie //D3_NUMSERI
+											'',; // Lote Origem //D3_LOTECTL
+											'',; // sublote origem // D3_NUMLOTE
+											'',;//data validade // D3_DTVALID
+											'',;//data validade // D3_ZNUMOS
+											'',;//data validade // D3_ZSEQOS
+											(_xAlias2)->Z16REC;
+											}) //Os produtos a serem utilizados
+													
+										aAdd(_aConf,{	'3',aLista/*dados da transferencia*/,;
+														{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z19_QUANT,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z16REC}/*log das informações encontradas*/,;
+														'Realizar Transferência para Quarentena (LOST)1?'+transform(_nTSBF)})
+
+
+							//aADD(_aConf,{'3',_aItens,_aDados,'Produto não encontrado,Deseja transferir para Quarentena - Etiqueta e Estoque?'})
+							aADD(_aConf,{'3',_aItens,_aDados,'Produto encontrado,Deseja transferir para Quarentena - Etiqueta e Estoque? A22'})
+							//A13
 						
 						EndIf
 						
@@ -2794,9 +2763,9 @@ Static Function sfCompPR()
 					EndIf
 					
 					(_xAlias4)->(dbclosearea())
-				else
+				Else
 				
-					_nTSBF := 0 //Saldo Transferido na SBF
+					//_nTSBF := 0 //Saldo Transferido na SBF
 					While((_xAlias2)->(!EOF()))
 	
 						//If((_xAlias2)->Z19_QUANT <> (_xAlias2)->Z16_SALDO)
@@ -2829,7 +2798,8 @@ Static Function sfCompPR()
 	
 								//Verifica saldo em nota - sbf
 								BeginSQL Alias _xAlias4 
-									select * from %table:SBF% SBF
+									SELECT *, BF_QUANT 
+									FROM %TABLE:SBF% SBF
 									WHERE BF_FILIAL=%EXP:(_xAlias)->FILIAL%
 									AND BF_PRODUTO=%EXP:(_xAlias)->PRODUTO% 
 									AND BF_LOCAL=%EXP:(_xAlias)->LOCAL% 
@@ -2841,13 +2811,14 @@ Static Function sfCompPR()
 								aLista := {}								
 								If((_xAlias4)->(EOF()))
 									//Sem Saldo na SBF	
-									msgalert('Sem Saldo na SBF	','(_xAlias2)->Z16_SALDO <> (_xAlias2)->Z19_QUANT .AND. (_xAlias2)->Z19_QUANT = 0')
+									//msgalert('Sem Saldo na SBF	','(_xAlias2)->Z16_SALDO <> (_xAlias2)->Z19_QUANT .AND. (_xAlias2)->Z19_QUANT = 0')
+									//A21
 								Else
 									If(((_xAlias4)->BF_QUANT - _nTSBF) >=  (_xAlias2)->Z16_SALDO)
 										//msgalert('Sem Saldo na SBF	entrou 1','(_xAlias2)->Z16_SALDO <> (_xAlias2)->Z19_QUANT .AND. (_xAlias2)->Z19_QUANT = 0')
 										aLista := {}
-										aAdd(aLista ,{	(_xAlias)->CODIGO,;	//produto origem
-													(_xAlias)->CODIGO,;	//produto destino
+										aAdd(aLista ,{	(_xAlias)->PRODUTO,;	//produto origem
+													(_xAlias)->PRODUTO,;	//produto destino
 													(_xAlias2)->Z19_QUANT,; //quantidade
 													(_xAlias)->LOCAL,; //local Origem
 													(_xAlias)->LOCAL,; //local Destino
@@ -2862,14 +2833,15 @@ Static Function sfCompPR()
 													(_xAlias2)->Z16REC;
 													}) //Os produtos a serem utilizados
 													
-										aAdd(_aConf,{	'6',aLista/*dados da transferencia*/,;
-														{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z19_QUANT,0,(_xAlias2)->Z16REC}/*log das informações encontradas*/,;
+										aAdd(_aConf,{	'3',aLista/*dados da transferencia*/,;
+														{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z19_QUANT,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z16REC}/*log das informações encontradas*/,;
 														'Realizar Transferência para Quarentena (LOST)1?'})
 										//aadd(_aReg,{'4',{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z19_QUANT,0},'Z16 transferido para Quarentena (Endereço LOST).'})
-										_nTSBF += (_xAlias2)->Z19_QUANT									
+										_nTSBF += (_xAlias2)->Z19_QUANT
+										//A22									
 									Else
-										aAdd(aLista ,{	(_xAlias)->CODIGO,;	//produto origem
-													(_xAlias)->CODIGO,;	//produto destino
+										aAdd(aLista ,{	(_xAlias)->PRODUTO,;	//produto origem
+													(_xAlias)->PRODUTO,;	//produto destino
 													(_xAlias2)->Z19_QUANT,; //quantidade
 													(_xAlias)->LOCAL,; //local Origem
 													(_xAlias)->LOCAL,; //local Destino
@@ -2883,12 +2855,25 @@ Static Function sfCompPR()
 													'',;//data validade // D3_ZSEQOS
 													(_xAlias2)->Z16REC;
 													}) //Os produtos a serem utilizados
+										//Produto não tem saldo na SBF
+										//Transfere a Etiqueta - Z16 para o endereço LOST / ou marca como deletada Decidir no processo
+										If((_xAlias2)->Z19_QUANT == 0)
+											aAdd(_aConf,{'5',;
+														 aLista,;
+														 {(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z19_QUANT,0,(_xAlias2)->Z16REC},;
+													 	 'Excluir a Etiqueta? (LOST)3?'})	//AO TRANSFERIR COM QUANTIDADE 0 - ROTINA GRAVA Z16_ORIGEM COM 'AIN' - ACERTO DE INVENTARIO E MARCA COMO DELETADO 										
+										Else
+											aAdd(_aConf,{'6',;
+														 aLista,;
+														 {(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z19_QUANT,0,(_xAlias2)->Z16REC},;
+													 	 'Realizar Transferência para Quarentena (LOST)3?'})
 										
-										//Transfere a Etiqueta - Z16 para o endereço LOST
-										aadd(_aConf,{'6',aLista,{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z19_QUANT,0,(_xAlias2)->Z16REC},;
-													 'Realizar Transferência para Quarentena (LOST)3?'})
+										EndIf
+										//trabalhar na exclusão do registro
+										//TODO: enviar registro para conferencia
 
-										_nTSBF += (_xAlias2)->Z19_QUANT	
+										_nTSBF += (_xAlias2)->Z19_QUANT
+										//A23	
 									EndIf
 								EndIf
 								//transfere para lost
@@ -2902,7 +2887,8 @@ Static Function sfCompPR()
 									verifica saldo na SBF010 
 								*/							
 								BeginSQL Alias _xAlias4 
-									select * from %table:SBF% SBF
+									SELECT *, BF_QUANT 
+									FROM %table:SBF% SBF
 									WHERE BF_FILIAL=%EXP:(_xAlias)->FILIAL%
 									AND BF_PRODUTO=%EXP:(_xAlias)->PRODUTO% 
 									AND BF_LOCAL=%EXP:(_xAlias)->LOCAL% 
@@ -2913,7 +2899,7 @@ Static Function sfCompPR()
 								If((_xAlias4)->(EOF()))
 									//NÃO EXISTE SALDO SBF
 									aadd(_aReg,{'3',{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z19_QUANT,(_xAlias2)->Z16REC},'Não existe saldo em nota no endereço informado.'},)
-									
+									//A31
 								ElseIf((_xAlias4)->BF_QUANT  = (_xAlias2)->Z19_QUANT)
 									//SBF igual ao realizado 
 									//msgalert('Z16 errado - corrige saldo Z16','SUMPREV > SUMREAL .AND. _nSaldoAt(Z16) <> (_xAlias)->SUMREAL)    -- ((_xAlias2)->Z16_SALDO <> (_xAlias2)->Z19_QUANT)')
@@ -2924,12 +2910,14 @@ Static Function sfCompPR()
 									
 									aadd(_aConf,{'5',;
 									_aItens/*aItens vazio, não faz transferencia*/,;
-									{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z19_QUANT,(_xAlias2)->Z19_QUANT,(_xAlias2)->Z16REC},;
+									{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z21_QUANT,(_xAlias2)->Z19_QUANT,(_xAlias2)->Z19_QUANT,(_xAlias2)->Z16REC},;
 									'Saldo da etiqueta é maior que saldo SBF/Realizado, Corrigir saldo para '+transform((_xAlias2)->Z19_QUANT,PESQPICT('Z19','Z19_QUANT'))+'?.'})
+									_nTSBF+=(_xAlias2)->Z19_QUANT
 									/*
 									
 									*/
-								ElseIf((_xAlias4)->BF_QUANT > (_xAlias2)->Z19_QUANT)
+									//A32
+								ElseIf((_xAlias4)->BF_QUANT+_nTSBF > (_xAlias2)->Z19_QUANT)
 									//Existe saldo na SBF
 									//aadd(_aReg,{'3',{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z19_QUANT,0,(_xAlias2)->Z16REC},'Existe saldo na SBF. Tranferir quantidade excedente para quarentena.'})
 									
@@ -2953,10 +2941,10 @@ Static Function sfCompPR()
 									aadd(	_aConf,{'3',;
 													aLista,;
 													{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z21_QUANT,(_xAlias2)->Z19_QUANT,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z16REC},;
-										 'Transferir a diferença para quarentena(LOST) ('+Transform((_xAlias2)->(Z16_SALDO-Z19_QUANT),pesqpict('Z19','Z19_QUANT'))+')?'})				
+										 'Transferir a diferença para Quarentena(LOST) ('+Transform((_xAlias2)->(Z16_SALDO-Z19_QUANT),pesqpict('Z19','Z19_QUANT'))+')?'})				
 									//aadd(_aConf,{'6',aLista,{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z19_QUANT,0,(_xAlias2)->Z16REC},'Transferir a diferença para quarentena(LOST) ('+Transform((_xAlias2)->(Z16_SALDO-Z19_QUANT),pesqpict('Z19','Z19_QUANT'))+')?'})				
 									//aadd(_aReg,{'1',{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z21_QUANT,(_xAlias2)->Z19_QUANT,(_xAlias2)->(Z16_SALDO), (_xAlias2)->Z16REC},'Transferir a diferença para LOST ('+Transform((_xAlias2)->(Z16_SALDO-Z19_QUANT),pesqpict('Z19','Z19_QUANT'))+')?'})
-									
+									//A33
 								Else
 									//ajusta saldo na Z16
 									/* -- em validação
@@ -2972,27 +2960,17 @@ Static Function sfCompPR()
 									//não existe saldo a ser transferido
 									aadd(_aReg,{'1',{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z19_QUANT,(_xAlias2)->Z19_QUANT, (_xAlias2)->Z16REC},'Corrigido saldo na Tabela de etiquetas'})
 									//aadd(_aConf,{'1',{{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z19_QUANT}},'Corrigido saldo na Tabela de etiquetas'})
-									
+									//A34
 								EndIf
 			
-								//SELECT * FROM SBF010 WHERE BF_
-			
-								//transfere para ARMAZEM 'LOST' e 
-								
-								//Divide saldo na Z16
-									
-								//transfere diferença para ARMAZEM 'LOST'
-			
-								
-									
-								
 								(_xAlias4)->(dbCloseArea())
 						
 						
 							Else
 								//msgalert('Entrou no else','linha 2980') //saldo ja corrigido 
 								aadd(_aReg,{'1',{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z19_QUANT,(_xAlias2)->Z19_QUANT, (_xAlias2)->Z16REC},'Saldo já corrigido'})
-									
+								_nTSBF+=(_xAlias2)->Z19_QUANT
+								//A35	
 							EndIf
 							
 						//EndIf	
@@ -3002,48 +2980,79 @@ Static Function sfCompPR()
 					EndDo
 				
 						
-				endif
+				EndIf
 								
 				
 				(_xAlias2)->(DBCloseArea())
-				//SBF  NO ARMAZEM / DOCAS
-				
-				//SD3 - MOVIMENTAÇÕES DE RETIRADA RECENTES DESTE PALET
-				
-				 
 				
 			ElseIf((_xAlias)->SUMREAL > (_xAlias)->SUMPREV  .AND. _nSaldoAt <> (_xAlias)->SUMREAL) // produtos encontrados a mais
 
 				//Compara previsto com estoque para verificar se correção já foi efetuada
 
-				BeginSQL ALIAS _xAlias2
-					%noparser%
+				IF(_xAlias)->SUMPREV = 0
+					BeginSQL ALIAS _xAlias2
+						%noparser%
+						SELECT	Z19_PLTCLI, Z19_DATA, COALESCE(Z19_QUANT,0) Z19_QUANT, Z19_QUANT, COALESCE(Z16_SALDO,0) Z16_SALDO, Z19_FILIAL, Z19_CODPRO,
+								Z19_LOCAL, 'ZZZ' Z19_PRIOR, Z19_ENDERE, Z19_LOTCTL ,'' Z19_NUMLOT,'' Z19_ESTFIS, Z19_IDENT, Z19_CONTAG,
+								Z19_ETQPAL, Z19_ETQPAL, Z19_ETQPRO, Z19_ETQVOL, Z19_ETQCLI, Z19_NUMSEQ, B1_CODBAR, Z19.R_E_C_N_O_ Z19REC, Z16.R_E_C_N_O_ Z16REC,
+								Z19_CODPRO PRODUTO, Z19_ENDERE ENDERECO, Z19_LOCAL LOCAL, COALESCE(Z21_QUANT,0) Z21_QUANT
+						FROM %TABLE:Z19% Z19 (NOLOCK)
+						JOIN %TABLE:Z06% Z06 (NOLOCK) ON 	Z06_FILIAL = %EXP:XFILIAL('Z06')% AND Z06_NUMOS=Z19_IDENT AND Z06_STATUS NOT IN ('CA','AG') AND 
+															Z06.D_E_L_E_T_=' '
+						JOIN %TABLE:SB1% SB1 (NOLOCK) ON B1_COD=Z19_CODPRO AND SB1.D_E_L_E_T_=' '
+						LEFT JOIN %TABLE:Z16% Z16 (NOLOCK) ON 	Z16_FILIAL=Z19_FILIAL AND Z16_CODPRO=Z19_CODPRO AND Z16_LOCAL=Z19_LOCAL AND 
+																Z16_ENDATU=Z19_ENDERE AND Z16_ETQPAL=Z19_ETQPAL AND Z16_ETQCLI=Z19_ETQCLI AND 
+																Z16_ETQVOL=Z19_ETQVOL AND Z16.D_E_L_E_T_=' '
+						LEFT JOIN %TABLE:Z21% Z21 (NOLOCK) ON 	Z19_FILIAL=Z21_FILIAL AND Z19_CODPRO=Z21_PROD AND Z19_LOCAL=Z21_LOCAL AND 
+															Z19_ENDERE=Z21_LOCALI AND Z19_ETQPAL=Z19_ETQPAL AND Z19_ETQCLI=Z19_ETQCLI AND 
+															Z19_ETQVOL=Z21_ETQVOL  AND Z21.D_E_L_E_T_=' '
+															AND Z19_CONTAG=Z21_NRCONT
+															AND Z21_CONTAG=(SELECT MAX(Z21A.Z21_CONTAG) FROM Z21010 Z21A (NOLOCK) WHERE Z21A.Z21_FILIAL=Z21.Z21_FILIAL	AND Z21A.Z21_IDENT=Z21.Z21_IDENT AND Z21A.Z21_LOCAL=Z21.Z21_LOCAL AND 	Z21A.Z21_LOCALI = Z21_LOCALI AND 	Z21A.Z21_PROD=Z21.Z21_PROD AND Z21A.D_E_L_E_T_=' '	)
+					 WHERE 	Z19_FILIAL=%EXP:(_xAlias)->FILIAL% AND 
+								Z19_IDENT=%EXP:(_xAlias)->CODIGO% AND 
+								Z19_CODPRO=%EXP:(_xAlias)->PRODUTO% AND
+								Z19_LOCAL=%EXP:(_xAlias)->LOCAL% AND 
+								Z19_ENDERE=%EXP:(_xAlias)->ENDERECO% AND 
+								Z19.D_E_L_E_T_=' '
+								AND Z19_CONTAG=(SELECT MAX(Z19A.Z19_CONTAG) FROM Z19010 Z19A (NOLOCK) WHERE Z19A.Z19_FILIAL=Z19.Z19_FILIAL	AND Z19A.Z19_IDENT=Z19.Z19_IDENT AND Z19A.Z19_LOCAL=Z19.Z19_LOCAL AND 	Z19A.Z19_ENDERE=Z19.Z19_ENDERE AND 	Z19A.Z19_CODPRO=Z19.Z19_CODPRO AND Z19A.D_E_L_E_T_=' '	)
+					EndSQL
 					
-					SELECT	Z19_QUANT,COALESCE(Z21_QUANT,0) Z21_QUANT, Z16_SALDO, Z21_FILIAL,Z21_PROD,
-							Z21_LOCAL,'ZZZ' Z21_PRIOR, Z21_LOCALI, Z21_LOTE ,Z21_NUMLOT,Z21_ESTFIS,Z21_IDENT,Z21_CONTAG,
-							Z21_ETQPAL,Z21_ETQPAL,Z21_ETQPRD, Z21_ETQVOL, Z21_ETQCLI,Z21_NUMSEQ,B1_CODBAR,Z16.R_E_C_N_O_ Z16REC
-					FROM %TABLE:Z21% Z21 (NOLOCK)
-					JOIN %TABLE:Z06% Z06 (NOLOCK) ON Z06_FILIAL = '103' AND Z06_NUMOS=Z21_IDENT AND Z06_STATUS NOT IN ('CA','AG') AND Z06.D_E_L_E_T_=' '
-					JOIN %TABLE:SB1% SB1 (NOLOCK) ON B1_COD=Z21_PROD AND SB1.D_E_L_E_T_=' '
-					LEFT JOIN %TABLE:Z16% Z16 (NOLOCK) ON 	Z16_FILIAL=Z21_FILIAL AND Z16_CODPRO=Z21_PROD AND Z16_LOCAL=Z21_LOCAL AND 
-														Z16_ENDATU=Z21_LOCALI AND Z16_ETQPAL=Z21_ETQPAL AND Z16_ETQCLI=Z21_ETQCLI AND 
-														Z16_ETQVOL=Z21_ETQVOL  AND Z16.D_E_L_E_T_=' '
-					LEFT JOIN %TABLE:Z19% Z19 (NOLOCK) ON 	Z19_FILIAL=Z21_FILIAL AND Z19_CODPRO=Z21_PROD AND Z19_LOCAL=Z21_LOCAL AND 
-														Z19_ENDERE=Z21_LOCALI AND Z19_ETQPAL=Z19_ETQPAL AND Z19_ETQCLI=Z19_ETQCLI AND 
-														Z19_ETQVOL=Z21_ETQVOL  AND Z19.D_E_L_E_T_=' '
-														AND Z19_CONTAG=Z21_NRCONT
-														AND Z19_CONTAG=(SELECT MAX(Z19A.Z19_CONTAG) FROM Z19010 Z19A (NOLOCK) WHERE Z19A.Z19_FILIAL=Z19.Z19_FILIAL	AND Z19A.Z19_IDENT=Z19.Z19_IDENT AND Z19A.Z19_LOCAL=Z19.Z19_LOCAL AND 	Z19A.Z19_ENDERE=Z19.Z19_ENDERE AND 	Z19A.Z19_CODPRO=Z19.Z19_CODPRO AND Z19A.D_E_L_E_T_=' '	)
-				 
-					WHERE 	Z21_FILIAL=%EXP:(_xAlias)->FILIAL% AND 
-							Z21_IDENT=%EXP:(_xAlias)->CODIGO% AND 
-							Z21_PROD=%EXP:(_xAlias)->PRODUTO% AND
-							Z21_LOCAL=%EXP:(_xAlias)->LOCAL% AND 
-							Z21_LOCALI=%EXP:(_xAlias)->ENDERECO% AND 
-							Z21.D_E_L_E_T_=' '		
-							AND Z21_CONTAG=(SELECT MAX(Z21A.Z21_CONTAG) FROM Z21010 Z21A (NOLOCK) WHERE Z21A.Z21_FILIAL=Z21.Z21_FILIAL	AND Z21A.Z21_IDENT=Z21.Z21_IDENT AND Z21A.Z21_LOCAL=Z21.Z21_LOCAL AND 	Z21A.Z21_LOCALI = Z21_LOCALI AND 	Z21A.Z21_PROD=Z21.Z21_PROD AND Z21A.D_E_L_E_T_=' '	)
+				Else
+					BeginSQL ALIAS _xAlias2
+						%noparser%
+						
+						SELECT	Z19_QUANT,COALESCE(Z21_QUANT,0) Z21_QUANT, COALESCE(Z16_SALDO,0), Z21_FILIAL,Z21_PROD,
+								Z21_LOCAL,'ZZZ' Z21_PRIOR, Z21_LOCALI, Z21_LOTE ,Z21_NUMLOT,Z21_ESTFIS,Z21_IDENT,Z21_CONTAG,
+								Z21_ETQPAL,Z21_ETQPAL,Z21_ETQPRD, Z21_ETQVOL, Z21_ETQCLI,Z21_NUMSEQ, 
+								Z19_ETQVOL,Z19_ETQPRO,B1_CODBAR,Z16.R_E_C_N_O_ Z16REC,
+								Z21_PROD PRODUTO, Z21_LOCALI ENDERECO, Z21_LOCAL LOCAL
+						FROM %TABLE:Z21% Z21 (NOLOCK)
+						JOIN %TABLE:Z06% Z06 (NOLOCK) ON Z06_FILIAL = '103' AND Z06_NUMOS=Z21_IDENT AND Z06_STATUS NOT IN ('CA','AG') AND Z06.D_E_L_E_T_=' '
+						JOIN %TABLE:SB1% SB1 (NOLOCK) ON B1_COD=Z21_PROD AND SB1.D_E_L_E_T_=' '
+						LEFT JOIN %TABLE:Z16% Z16 (NOLOCK) ON 	Z16_FILIAL=Z21_FILIAL AND Z16_CODPRO=Z21_PROD AND Z16_LOCAL=Z21_LOCAL AND 
+															Z16_ENDATU=Z21_LOCALI AND Z16_ETQPAL=Z21_ETQPAL AND Z16_ETQCLI=Z21_ETQCLI AND 
+															Z16_ETQVOL=Z21_ETQVOL  AND Z16.D_E_L_E_T_=' '
+						LEFT JOIN %TABLE:Z19% Z19 (NOLOCK) ON 	Z19_FILIAL=Z21_FILIAL AND Z19_CODPRO=Z21_PROD AND Z19_LOCAL=Z21_LOCAL AND 
+															Z19_ENDERE=Z21_LOCALI AND Z19_ETQPAL=Z19_ETQPAL AND Z19_ETQCLI=Z19_ETQCLI AND 
+															Z19_ETQVOL=Z21_ETQVOL  AND Z19.D_E_L_E_T_=' '
+															AND Z19_CONTAG=Z21_NRCONT
+															AND Z19_CONTAG=(SELECT MAX(Z19A.Z19_CONTAG) FROM Z19010 Z19A (NOLOCK) WHERE Z19A.Z19_FILIAL=Z19.Z19_FILIAL	AND Z19A.Z19_IDENT=Z19.Z19_IDENT AND Z19A.Z19_LOCAL=Z19.Z19_LOCAL AND 	Z19A.Z19_ENDERE=Z19.Z19_ENDERE AND 	Z19A.Z19_CODPRO=Z19.Z19_CODPRO AND Z19A.D_E_L_E_T_=' '	)
+					 
+						WHERE 	Z21_FILIAL=%EXP:(_xAlias)->FILIAL% AND 
+								Z21_IDENT=%EXP:(_xAlias)->CODIGO% AND 
+								Z21_PROD=%EXP:(_xAlias)->PRODUTO% AND
+								Z21_LOCAL=%EXP:(_xAlias)->LOCAL% AND 
+								Z21_LOCALI=%EXP:(_xAlias)->ENDERECO% AND 
+								Z21.D_E_L_E_T_=' '		
+								AND Z21_CONTAG=(SELECT MAX(Z21A.Z21_CONTAG) FROM Z21010 Z21A (NOLOCK) WHERE Z21A.Z21_FILIAL=Z21.Z21_FILIAL	AND Z21A.Z21_IDENT=Z21.Z21_IDENT AND Z21A.Z21_LOCAL=Z21.Z21_LOCAL AND 	Z21A.Z21_LOCALI = Z21_LOCALI AND 	Z21A.Z21_PROD=Z21.Z21_PROD AND Z21A.D_E_L_E_T_=' '	)
+								
+					EndSQL
+				EndIf 
 
 				
-				EndSQL
+					
+					
+					
 					
 				/*	
 					SELECT	Z19_PLTCLI, Z19_DATA, COALESCE(Z19_QUANT,0) Z19_QUANT, Z19_QUANT, COALESCE(Z16_SALDO,0) Z16_SALDO, Z19_FILIAL, Z19_CODPRO,
@@ -3065,41 +3074,42 @@ Static Function sfCompPR()
 							AND Z19_CONTAG=(SELECT MAX(Z19A.Z19_CONTAG) FROM Z19010 Z19A (NOLOCK) WHERE Z19A.Z19_FILIAL=Z19.Z19_FILIAL	AND Z19A.Z19_IDENT=Z19.Z19_IDENT AND Z19A.Z19_LOCAL=Z19.Z19_LOCAL AND 	Z19A.Z19_ENDERE=Z19.Z19_ENDERE AND 	Z19A.Z19_CODPRO=Z19.Z19_CODPRO AND Z19A.D_E_L_E_T_=' '	)
 				*/
 				
-//				CopytoClipboard (GETLASTQUERY()[2])
+				CopytoClipboard (GETLASTQUERY()[2])
 //				msginfo(GETLASTQUERY()[2],'TWMSA021 2')
 	
 	
 				While((_xAlias2)->(!EOF()))
 					_lEtEndD := .F.
 					_lSaldBF := .F.
-					_nSlSBF := 0
 					
 					If((_xAlias2)->Z16_SALDO <> (_xAlias2)->Z19_QUANT)
-					
 						//PROCURA ETIQUETA DE VOLUME EM OUTRO ENDEREÇO - CASO ESTEJA PREENCHIDA
 						If(ALLTRIM((_xAlias2)->Z19_ETQVOL) <> '')
 							BeginSQL ALIAS _xAlias3
 								%noparser%
 								SELECT *, Z16_ENDATU ENDERECO, Z16_ETQVOL VOLUME, Z16_LOCAL LOCAL, Z16_CODPRO PRODUTO, R_E_C_N_O_ Z16REC
-								FROM %YABLE:Z16% Z16 (NOLOCK)
+								FROM %TABLE:Z16% Z16 (NOLOCK)
 								WHERE 	Z16_FILIAL = %EXP:(_xAlias2)->Z19_FILIAL% AND Z16_ETQVOL=%EXP:(_xAlias2)->Z19_ETQVOL% AND 
 										Z16_CODPRO=%EXP:(_xAlias2)->Z19_CODPRO% AND Z16_SALDO>=%EXP:(_xAlias2)->Z19_QUANT% AND 
-										Z16.D_E_L_E_T_=' ' 		
+										Z16.D_E_L_E_T_=' ' 	AND Z16_ENDATU <> %EXP:(_xAlias2)->Z19_ENDERE%
 							EndSQL
+							
+							//CopytoClipboard (GETLASTQUERY()[2])
+							//msginfo(GETLASTQUERY()[2],'TWMSA021 2 - 1')
 							
 							If((_xAlias3)->(!EOF()))
 								_lEtEndD := .T.
 								//PRODUTO ENCONTRADO NO ENDEREÇO XXX DESEJA TRANSFERIR?
-								aadd(_aReg,{'3',{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias)->SUMPREV,(_xAlias2)->Z19_QUANT,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z16REC},'Etiqueta encontrada em '+(_xAlias3)->ENDERECO+' - aguardando transferência'})
+								//aAdd(_aReg,{'3',{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias)->SUMPREV,(_xAlias2)->Z19_QUANT,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z16REC},'Etiqueta encontrada em '+(_xAlias3)->ENDERECO+' - aguardando transferência'})
 			
 								aLista := { {;
 												(_xAlias3)->PRODUTO,;	//produto origem		[01]
 												(_xAlias2)->PRODUTO,;	//produto destino	[02]
 												(_xAlias2)->Z19_QUANT,; //quantidade			[03]
 												(_xAlias3)->LOCAL,; //local Origem				[04]
-												(_xAlias2)->Z19_LOCAL,; //local Destino			[05]
+												(_xAlias2)->LOCAL,; //local Destino			[05]
 												(_xAlias3)->ENDERECO,; //Endereco Origem		[06]
-												(_xAlias2)->Z19_ENDERE,; //Local Destino		[07]
+												(_xAlias2)->ENDERECO,; //Local Destino		[07]
 												'',; // Numero serie //D3_NUMSERI				[08]
 												'',; // Lote Origem //D3_LOTECTL				[09]
 												'',; // sublote origem // D3_NUMLOTE			[10]
@@ -3109,8 +3119,10 @@ Static Function sfCompPR()
 												(_xAlias3)->Z16REC;//REGISTRO Z16 A TRANSFERIR	[14]
 												} } //Os produtos a serem utilizados
 								//transferencia do valor total para o endereço inventariado	
-				
-								aadd(_aConf,{'3',aLista,{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z19_QUANT,(_xAlias)->SUMREAL,(_xAlias2)->Z19_QUANT-(_xAlias)->SUMREAL,(_xAlias2)->Z16REC},'Realizar Transferência da Quarentena para '+(_xalias2)->Z19_ENDERE+'?'})
+								
+								//VERIFICA SE SALDO  NO ENDEREÇO É MAIOR QUE A SOMA DA Z16
+
+								aAdd(_aConf,{'3',aLista,{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,iif(type('(_xAlias2)->Z21_QUANT')='U',0,(_xAlias2)->Z21_QUANT),(_xAlias2)->Z19_QUANT,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z16REC},'Realizar Transferência da '+(_xAlias3)->ENDERECO+' para '+(_xalias2)->Z19_ENDERE+'?'})
 
 								//adiconar produto a lista de transferencias -> Z16, SD3 - CONFERIR SBF - VER SE ENDEREÇO TEM OUTRAS ETIQUETAS
 
@@ -3120,17 +3132,42 @@ Static Function sfCompPR()
 								//Solicitica validação para criar etiqueta - Verificar regra para criação de etiqueta
 								//aLista := {(_xAlias2)->Z19REC}
 								//msgyesno('Etiqueta não encontrada','Criar etiqueta de endereço e transferir para LOST?')
-								//aadd(_aConf,{'4',aLista,{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z19_QUANT,(_xAlias)->SUMREAL,0},'Produto não encontrado nas Etiquetas '+CRLF+' Realizar Transferência do Endereço '+AllTrim((_xalias2)->Z19_ENDERE)+' para Quarentena para ?',(_xAlias2)->Z16_SALDO,(_xAlias2)->Z19_QUANT,(_xAlias2)->Z19_QUANT})
+								//aAdd(_aConf,{'4',aLista,{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z19_QUANT,(_xAlias)->SUMREAL,0},'Produto não encontrado nas Etiquetas '+CRLF+' Realizar Transferência do Endereço '+AllTrim((_xalias2)->Z19_ENDERE)+' para Quarentena para ?',(_xAlias2)->Z16_SALDO,(_xAlias2)->Z19_QUANT,(_xAlias2)->Z19_QUANT})
 									/*_aConf(status,tranferencias,dadosetq,mensagem) */
 								
 							EndIf
 							
 							(_xAlias3)->(DBCloseArea())
 							
+						
+						ElseIf(ALLTRIM((_xAlias2)->Z19_ETQPRO) <> '')
+							BeginSQL ALIAS _xAlias3
+								%noparser%
+								SELECT *, Z16_ENDATU ENDERECO, Z16_ETQVOL VOLUME, Z16_LOCAL LOCAL, Z16_CODPRO PRODUTO, R_E_C_N_O_ Z16REC
+								FROM %TABLE:Z16% Z16 (NOLOCK)
+								WHERE 	Z16_FILIAL = %EXP:(_xAlias2)->Z19_FILIAL% AND Z16_ETQVOL=%EXP:(_xAlias2)->Z19_ETQPRO% AND 
+										Z16_CODPRO=%EXP:(_xAlias2)->Z19_CODPRO% AND Z16_SALDO>=%EXP:(_xAlias2)->Z19_QUANT% AND 
+										Z16.D_E_L_E_T_=' ' 		
+							EndSQL
+							
+							
+							(_xAlias3)->(DBCloseArea())
+						Else
+							aAdd(_aReg,{'3',{(_xAlias)->FILIAL,; 	//[1]
+										 (_xAlias)->CODIGO,; 	//[2]
+										 (_xAlias)->LOCAL,;  	//[3]
+										 (_xAlias)->ENDERECO,;	//[4]
+										 (_xAlias)->PRODUTO,; 	//[5]
+										 (_xAlias2)->Z16_QUANT,; //[6]
+										 (_xAlias2)->Z19_QUANT,;//[7]
+										 (_xAlias2)->Z16REC;//[7]
+										 },'Diferença não encontrada em outro endereço. '+;
+										 	IIf(!empty((_xAlias2)->Z19_ETQPRO),'<BR>Etiqueta de Produto: '+AllTrim((_xAlias2)->Z19_ETQPRO),'')+;
+										 	IIf(!empty((_xAlias2)->Z19_ETQVOL),'<BR>Etiqueta de Volume: '+AllTrim((_xAlias2)->Z19_ETQVOL),'')})
 						EndIf
 					Else
 //						msginfo('<html>Saldo já corrigido.','Verifica Divergencias')
-						aadd(_aReg,{'2',{(_xAlias)->FILIAL,; 	//[1]
+						aAdd(_aReg,{'2',{(_xAlias)->FILIAL,; 	//[1]
 										 (_xAlias)->CODIGO,; 	//[2]
 										 (_xAlias)->LOCAL,;  	//[3]
 										 (_xAlias)->ENDERECO,;	//[4]
@@ -3139,11 +3176,11 @@ Static Function sfCompPR()
 										 (_xAlias2)->Z19_QUANT,;//[7]
 										 (_xAlias2)->Z16REC;//[7]
 										 },'Estoque ok, Verificar Volumes'})
-						reclock(_xAlias,.f.)
+						RecLock(_xAlias,.f.)
 							(_xAlias)->STATUS := '1'
 						(_xAlias)->(msunlock())
 					EndIf
-					(_xAlias2)->(DBSKIP())
+					(_xAlias2)->(DbSkip())
 				EndDo
 				
 				
@@ -3204,7 +3241,7 @@ Static Function sfCompPR()
 				//msgalert('teste',' previsto > realizado -- else')
 				//Caixas sem etiqueta no item do produto
 //				msginfo('Saldo do estoque igual ao do inventário. Ocorrência de divergência de volumes serão tratadas posteriormente.','Verificar Divergências')
-				aadd(_aReg,{'2',{	(_xAlias)->FILIAL,; //[1]
+				aAdd(_aReg,{'2',{	(_xAlias)->FILIAL,; //[1]
 									(_xAlias)->CODIGO,; //[2]
 									(_xAlias)->LOCAL,; //[3]
 									(_xAlias)->ENDERECO,; //[4]
@@ -3304,7 +3341,7 @@ aItSDB := {{"DB_ITEM"	  ,"0001"	      ,Nil},;
 			{"DB_DATA"	  ,dDataBase    ,Nil},;
 			{"DB_QUANT"  ,20                  ,Nil}}       
 
-aadd(_aItensSDB,aitSDB)
+aAdd(_aItensSDB,aitSDB)
 
 //Executa o endereçamento do item
 
@@ -3333,7 +3370,7 @@ aItSDB := {{"DB_ITEM"	  ,"0001"	      ,Nil},;
 			{"DB_DATA"	  ,dDataBase    ,Nil},;                   
 			{"DB_QUANT"  ,20                  ,Nil}}       
 
-aadd(_aItensSDB,aitSDB)
+aAdd(_aItensSDB,aitSDB)
 //Executa o estorno do item
 
 MATA265( aCabSDA, _aItensSDB, 4)
@@ -3383,10 +3420,10 @@ Local _lRet := .T.
 	//MSGALERT('APOS sfMata261','UF021T')
 
 /*
-    aadd(aLinha,{"D3_NUMSERI", "", Nil}) //Numero serie
-    aadd(aLinha,{"D3_LOTECTL", "", Nil}) //Lote Origem
-    aadd(aLinha,{"D3_NUMLOTE", "", Nil}) //sublote origem
-    aadd(aLinha,{"D3_DTVALID", '', Nil}) //data validade
+    aAdd(aLinha,{"D3_NUMSERI", "", Nil}) //Numero serie
+    aAdd(aLinha,{"D3_LOTECTL", "", Nil}) //Lote Origem
+    aAdd(aLinha,{"D3_NUMLOTE", "", Nil}) //sublote origem
+    aAdd(aLinha,{"D3_DTVALID", '', Nil}) //data validade
 */
 Return _lRet
 
@@ -3422,7 +3459,7 @@ Private lMsErroAuto := .F.
 
 //Cabecalho a Incluir
 cDocumen := GetSxeNum("SD3","D3_DOC")
-aadd(aAuto,{cDocumen,dDataBase}) //Cabecalho
+aAdd(aAuto,{cDocumen,dDataBase}) //Cabecalho
 
 //Itens a Incluir
 aItem := {}
@@ -3454,43 +3491,43 @@ for nX := 1 to len(aLista)// step 1
     //Origem
     SB1->(DBSETORDER(1))
     if(!SB1->(DbSeek(xFilial("SB1")+PadR(aLista[nX][1], tamsx3('D3_COD') [1]))))
-    	msgalert(xFilial("SB1")+PadR(aLista[nX][1], tamsx3('D3_COD') [1]),'produto não encontrado')
+    	//msgalert(xFilial("SB1")+PadR(aLista[nX][1], tamsx3('D3_COD') [1]),'produto não encontrado')
     endif
-    aadd(aLinha,{"ITEM",'00'+cvaltochar(nX),Nil})
-    aadd(aLinha,{"D3_COD", SB1->B1_COD, Nil}) //Cod Produto origem
-    aadd(aLinha,{"D3_DESCRI", SB1->B1_DESC, Nil}) //descr produto origem
-    aadd(aLinha,{"D3_UM", SB1->B1_UM, Nil}) //unidade medida origem
-    aadd(aLinha,{"D3_LOCAL", aLista[nX][4], Nil}) //armazem origem
-    aadd(aLinha,{"D3_LOCALIZ", PadR(aLista[nX][6], tamsx3('D3_LOCALIZ') [1]),Nil}) //Informar endereço origem
+    aAdd(aLinha,{"ITEM",'00'+cvaltochar(nX),Nil})
+    aAdd(aLinha,{"D3_COD", SB1->B1_COD, Nil}) //Cod Produto origem
+    aAdd(aLinha,{"D3_DESCRI", SB1->B1_DESC, Nil}) //descr produto origem
+    aAdd(aLinha,{"D3_UM", SB1->B1_UM, Nil}) //unidade medida origem
+    aAdd(aLinha,{"D3_LOCAL", aLista[nX][4], Nil}) //armazem origem
+    aAdd(aLinha,{"D3_LOCALIZ", PadR(aLista[nX][6], tamsx3('D3_LOCALIZ') [1]),Nil}) //Informar endereço origem
     
     //Destino
     SB1->(DbSeek(xFilial("SB1")+PadR(aLista[nX][2], tamsx3('D3_COD') [1])))
-    aadd(aLinha,{"D3_COD", SB1->B1_COD, Nil}) //cod produto destino
-    aadd(aLinha,{"D3_DESCRI", SB1->B1_DESC, Nil}) //descr produto destino
-    aadd(aLinha,{"D3_UM", SB1->B1_UM, Nil}) //unidade medida destino
-    aadd(aLinha,{"D3_LOCAL", aLista[nX][5], Nil}) //armazem destino
-    aadd(aLinha,{"D3_LOCALIZ", PadR(aLista[nX][7], tamsx3('D3_LOCALIZ') [1]),Nil}) //Informar endereÃ§o destino
+    aAdd(aLinha,{"D3_COD", SB1->B1_COD, Nil}) //cod produto destino
+    aAdd(aLinha,{"D3_DESCRI", SB1->B1_DESC, Nil}) //descr produto destino
+    aAdd(aLinha,{"D3_UM", SB1->B1_UM, Nil}) //unidade medida destino
+    aAdd(aLinha,{"D3_LOCAL", aLista[nX][5], Nil}) //armazem destino
+    aAdd(aLinha,{"D3_LOCALIZ", PadR(aLista[nX][7], tamsx3('D3_LOCALIZ') [1]),Nil}) //Informar endereÃ§o destino
     
-    aadd(aLinha,{"D3_NUMSERI", aLista[nX][8], Nil}) //Numero serie
-    aadd(aLinha,{"D3_LOTECTL", padr(aLista[nX][9],tamsx3('D3_LOTECTL') [1])/*aLista[nX+8]*/, Nil}) //Lote Origem
-    aadd(aLinha,{"D3_NUMLOTE", aLista[nX][10], Nil}) //sublote origem
-    aadd(aLinha,{"D3_DTVALID", aLista[nX][11], Nil}) //data validade
-    aadd(aLinha,{"D3_POTENCI", 0, Nil}) // Potencia
-    aadd(aLinha,{"D3_QUANT", aLista[nX][3], Nil}) //Quantidade
-    aadd(aLinha,{"D3_QTSEGUM", 0, Nil}) //Seg unidade medida
-    aadd(aLinha,{"D3_ESTORNO", "", Nil}) //Estorno
-    aadd(aLinha,{"D3_NUMSEQ", "", Nil}) // Numero sequencia D3_NUMSEQ
+    aAdd(aLinha,{"D3_NUMSERI", aLista[nX][8], Nil}) //Numero serie
+    aAdd(aLinha,{"D3_LOTECTL", padr(aLista[nX][9],tamsx3('D3_LOTECTL') [1])/*aLista[nX+8]*/, Nil}) //Lote Origem
+    aAdd(aLinha,{"D3_NUMLOTE", aLista[nX][10], Nil}) //sublote origem
+    aAdd(aLinha,{"D3_DTVALID", aLista[nX][11], Nil}) //data validade
+    aAdd(aLinha,{"D3_POTENCI", 0, Nil}) // Potencia
+    aAdd(aLinha,{"D3_QUANT", aLista[nX][3], Nil}) //Quantidade
+    aAdd(aLinha,{"D3_QTSEGUM", 0, Nil}) //Seg unidade medida
+    aAdd(aLinha,{"D3_ESTORNO", "", Nil}) //Estorno
+    aAdd(aLinha,{"D3_NUMSEQ", "", Nil}) // Numero sequencia D3_NUMSEQ
     
-    aadd(aLinha,{"D3_LOTECTL", padr(aLista[nX][9],tamsx3('D3_LOTECTL') [1])/*aLista[nX+8]*/, Nil}) //Lote destino
-    aadd(aLinha,{"D3_NUMLOTE", aLista[nX][10], Nil}) //sublote destino
-    aadd(aLinha,{"D3_DTVALID", aLista[nX][11], Nil}) //validade lote destino
-    aadd(aLinha,{"D3_ITEMGRD", "", Nil}) //Item Grade
+    aAdd(aLinha,{"D3_LOTECTL", padr(aLista[nX][9],tamsx3('D3_LOTECTL') [1])/*aLista[nX+8]*/, Nil}) //Lote destino
+    aAdd(aLinha,{"D3_NUMLOTE", aLista[nX][10], Nil}) //sublote destino
+    aAdd(aLinha,{"D3_DTVALID", aLista[nX][11], Nil}) //validade lote destino
+    aAdd(aLinha,{"D3_ITEMGRD", "", Nil}) //Item Grade
     
     /* CAMPOS CONFORME ROTINA DE TRANSFERENCIA MATA261*/
-//    aadd(aLinha,{"D3_IDDCF", "", Nil}) //Item Grade
-//    aadd(aLinha,{"D3_ZNUMOS", "", Nil}) //Item Grade
-//    aadd(aLinha,{"D3_ZSEQOS", "", Nil}) //Item Grade
-//    aadd(aLinha,{"D3_ZETQPLT", "", Nil}) //Item Grade
+//    aAdd(aLinha,{"D3_IDDCF", "", Nil}) //Item Grade
+//    aAdd(aLinha,{"D3_ZNUMOS", "", Nil}) //Item Grade
+//    aAdd(aLinha,{"D3_ZSEQOS", "", Nil}) //Item Grade
+//    aAdd(aLinha,{"D3_ZETQPLT", "", Nil}) //Item Grade
 
 
     aAdd(aAuto,aLinha)
@@ -3509,7 +3546,7 @@ MSExecAuto({|x,y| mata261(x,y)},aAuto,nOpcAuto)
 if lMsErroAuto
 	//msgalert('erro','execauto mata261')
     MostraErro()
-    EECVIEW(VARINFO('aAuto',aAuto),'MATA261 - 3')
+    //EECVIEW(VARINFO('aAuto',aAuto),'MATA261 - 3')
     lEstorno := .F.
     _lRet := .F.
 else
@@ -3533,8 +3570,8 @@ If lContinua
     
         //-- Preenchimento dos campos
         aAuto := {}
-        aadd(aAuto,{"D3_DOC", cDocumen, Nil})
-        aadd(aAuto,{"D3_COD", aLista[nX], Nil})
+        aAdd(aAuto,{"D3_DOC", cDocumen, Nil})
+        aAdd(aAuto,{"D3_COD", aLista[nX], Nil})
         
         DbSelectArea("SD3")
         DbSetOrder(2)
@@ -3702,6 +3739,7 @@ Static Function sfTConfDiv(_aConf,_aReg)
 	Local _aCpoBro2 := {}
 	Local _oDlg2
 	Local _aCores := {}
+	Local _aRelat := {}
 	
 	Local aSize, aObjects
 	
@@ -3747,7 +3785,7 @@ Static Function sfTConfDiv(_aConf,_aReg)
 	
 
 	for _nI:=1 to Len(_aConf)
-		If(_aConf[_nI][1]$'56')
+		If(_aConf[_nI][1]$'56') //TRANSFERE ENDEREÇO
 			//eecview(varinfo('_aConf5['+cvaltochar(_nI)+']',_aConf))
 			//{(_xAlias)->FILIAL,(_xAlias)->CODIGO,(_xAlias)->LOCAL,(_xAlias)->ENDERECO,(_xAlias)->PRODUTO,(_xAlias2)->Z16_SALDO,(_xAlias2)->Z19_QUANT,(_xAlias2)->Z19_QUANT}
 			reclock(_xAliasA,.T.)
@@ -3766,7 +3804,7 @@ Static Function sfTConfDiv(_aConf,_aReg)
 			(_xAliasA)->(msunlock())
 			
 			
-		Elseif(_aConf[_nI][1]$'34')
+		Elseif(_aConf[_nI][1]$'34') // TRANSFERE ESTOQUE3
 			//eecview(varinfo('_aConf346['+cvaltochar(_nI)+']',_aConf))
 			for _nj := 1 to len(_aConf[_nI][2])
 				reclock(_xAliasA,.T.)
@@ -3808,7 +3846,7 @@ Static Function sfTConfDiv(_aConf,_aReg)
 	
 	aSize := MsAdvSize()
 	aObjects := {}
-	AAdd( aObjects, { 80, 80, .T., .T. } )
+	aAdd( aObjects, { 80, 80, .T., .T. } )
 	
 	aInfo := { aSize[ 1 ], aSize[ 2 ], aSize[ 3 ], aSize[ 4 ], 3, 3 }
 	aPosObj := MsObjSize( aInfo, aObjects )
@@ -3850,10 +3888,10 @@ _oDlg:bInit     := EnchoiceBar(_oDlg, {|| nOpcA:=1, _oDlg:End() },{|| _oDlg:End(
 	*/
 
 	If nOpcA == 1 
-		
-		
+	
 		(_xAliasA)->(dbgotop())
 		While((_xAliasA)->(!EOF()))
+			_aRelat := nil
 			If(!empty((_xAliasA)->OK)) // foi selecionado
 				If(_aConf[(_xAliasA)->(Recno())][1]=='3')
 					//executa a transferencia do produto
@@ -3862,6 +3900,7 @@ _oDlg:bInit     := EnchoiceBar(_oDlg, {|| nOpcA:=1, _oDlg:End() },{|| _oDlg:End(
 						//eecview(varinfo('transf3 - pre',_aConf[(_xAliasA)->(Recno())][2]))
 						//If(msgyesno('efetiva transferencia','teste'))
 							If(sfMata261(_aConf[(_xAliasA)->(Recno())][2]))
+								_aRelat := _aConf[(_xAliasA)->(Recno())][3]
 								//altera z16 para o endereço indicado ao fim da transferencia de estoque
 								//Posiciona na Z16
 								Z16->(dbgoto(_aConf[(_xAliasA)->(Recno())][2][1][14]))
@@ -3871,20 +3910,24 @@ _oDlg:bInit     := EnchoiceBar(_oDlg, {|| nOpcA:=1, _oDlg:End() },{|| _oDlg:End(
 									RECLOCK('Z16',.F.)
 										Z16->Z16_ENDATU:=_aConf[(_xAliasA)->(Recno())][2][1][7]		
 									Z16->(MSUNLOCK())
+									_aRelat[8]:= Z16->Z16_SALDO
 								Else
-									RECLOCK('Z16',.F.)
-										Z16->Z16_ENDATU	:= _aConf[(_xAliasA)->(Recno())][2][1][7]		
-										Z16->Z16_SALDO	-= _aConf[(_xAliasA)->(Recno())][2][1][3]		
-									Z16->(MSUNLOCK())
-									sfTransfCriaEtiqueta(_aConf[(_xAliasA)->(Recno())][2][1][6],_aConf[(_xAliasA)->(Recno())][2][1][3])
+									If(Z16->Z16_SALDO > _aConf[(_xAliasA)->(Recno())][2][1][3])
+										RECLOCK('Z16',.F.)
+											//Z16->Z16_ENDATU	:= _aConf[(_xAliasA)->(Recno())][2][1][7]		
+											Z16->Z16_SALDO	-= _aConf[(_xAliasA)->(Recno())][2][1][3]		
+										Z16->(MSUNLOCK())
+										_aRelat[8]:= Z16->Z16_SALDO
+										sfTransfCriaEtiqueta(_aConf[(_xAliasA)->(Recno())][2][1][7],_aConf[(_xAliasA)->(Recno())][2][1][3])
+									Else
+										//'Verificar Ocorrido - tentando transferir quantidade maior que o saldo'
+									EndIf
 								EndIf
-								
-								_aRelat := _aConf[(_xAliasA)->(Recno())][3]
-
-								aAdd(_aReg,{'1',_aConf[(_xAliasA)->(Recno())][3],'Etiqueta Transferida de '+AllTrim(_aConf[(_xAliasA)->(Recno())][2][1][6])+' para '+alltrim(_aConf[(_xAliasA)->(Recno())][2][1][7])+', Quantidade: '+transform(_aConf[(_xAliasA)->(Recno())][2][1][3],pesqpict('Z16','Z16_QUANT'))})						
+								//U_FtGeraLog(mvFilExt, mvTabela, mvChave, mvDescri, mvDepto, mvProcesso, mvCodUser)
+								//U_FtGeraLog(xFilial("Z16"),"Z16",, _cMsg , "Inventario - Divergencia", "WMS", __cuserid)
+								aAdd(_aReg,{'1',_aRelat,'Etiqueta Transferida de '+AllTrim(_aConf[(_xAliasA)->(Recno())][2][1][6])+' para '+alltrim(_aConf[(_xAliasA)->(Recno())][2][1][7])+', Quantidade: '+transform(_aConf[(_xAliasA)->(Recno())][2][1][3],pesqpict('Z16','Z16_QUANT'))})						
 							Else
-								rollbacksx8()
-								mostraerro()
+								DisarmTransaction()
 								aAdd(_aReg,{'3',_aConf[(_xAliasA)->(Recno())][3],'Erro ao Transferir de '+AllTrim(_aConf[(_xAliasA)->(Recno())][2][1][6])+' para '+alltrim(_aConf[(_xAliasA)->(Recno())][2][1][7])+'.'})							
 								
 							EndIf
@@ -3895,91 +3938,69 @@ _oDlg:bInit     := EnchoiceBar(_oDlg, {|| nOpcA:=1, _oDlg:End() },{|| _oDlg:End(
 				
 					Begin Transaction
 						//em validação 
-						//encontrado produto a mais que no endereço / pallet - insere e solicita transferencia para Lost
+						//encontrado produto a mais que no endereço - insere e solicita transferencia para Lost
 						dbselectarea("Z16")
 						If(Z16->(dbgoto(_aConf[(_xAliasA)->(Recno())][2][1])))
-							
-							//sfTransfCriaEtiqueta(,Quantidade,etiqueta)	
-						
+							sfTransfCriaEtiqueta(_aConf[(_xAliasA)->(Recno())][2][1][7],_aConf[(_xAliasA)->(Recno())][2][1][3])
 						EndIf
 */
-						aadd(_aReg,{'3',_aConf[(_xAliasA)->(Recno())][3],'Etiqueta transferida de '+_aConf[(_xAliasA)->(Recno())][2][2]	+' para '+_aConf[(_xAliasA)->(Recno())][2][3]+' - em validação'})
+						aAdd(_aReg,{'1',_aConf[(_xAliasA)->(Recno())][3],'Etiqueta transferida de '+_aConf[(_xAliasA)->(Recno())][2][2]	+' para '+_aConf[(_xAliasA)->(Recno())][2][3]+' - em validação'})
 									
-					end transaction
+					End Transaction
 
 				ElseIf(_aConf[(_xAliasA)->(Recno())][1]=='5')
-				//eecview(varinfo('a',_aConf[(_xAliasA)->(Recno())]),'Tipo de correção '+_aConf[(_xAliasA)->(Recno())][1])
-				//Corrige saldo Z16
-				//_aDados := _aConf[(_xAliasA)->(Recno())][2]
+					//eecview(varinfo('a',_aConf[(_xAliasA)->(Recno())]),'Tipo de correção '+_aConf[(_xAliasA)->(Recno())][1])
+					//Corrige saldo Z16
+					//_aDados := _aConf[(_xAliasA)->(Recno())][2]
+					
+					dbselectarea("Z16")
+					Z16->(dbgoto(_aConf[(_xAliasA)->(Recno())][3][9]))
+					
+					BEGIN TRANSACTION
+					If(_aConf[(_xAliasA)->(Recno())][3][8]	== 0)
+						//Exclui a etiqueta por não ter saldo
+						RECLOCK('Z16',.F.)
+							Z16->Z16_ORIGEM := 'AIN'
+							Z16->(DbDelete())
+						Z16->(MSUNLOCK())
+						aAdd(_aReg,{'1',_aConf[(_xAliasA)->(Recno())][3],'Etiqueta foi excluída.'})
 				
-				dbselectarea("Z16")
-				Z16->(dbgoto(_aConf[(_xAliasA)->(Recno())][3][9]))
+					Else
+						RECLOCK('Z16',.F.)
+							Z16->Z16_SALDO:=_aConf[(_xAliasA)->(Recno())][3][8]		
+						Z16->(MSUNLOCK())
+						aAdd(_aReg,{'1',_aConf[(_xAliasA)->(Recno())][3],'Saldo alterado para '+AllTrim(Transform(_aConf[(_xAliasA)->(Recno())][3][8],pesqpict('Z16','Z16_SALDO')))+'.'})
 				
-				BEGIN TRANSACTION
-
-				RECLOCK('Z16',.F.)
-					Z16->Z16_SALDO:=_aConf[(_xAliasA)->(Recno())][3][8]			
-				Z16->(MSUNLOCK())
-				
-				END TRANSACTION
-				
-				
-				/*
-				Begin Transaction
-						//em validação 
-						//encontrado produto a mais que no endereço / pallet - insere e solicita transferencia para Lost
-						dbselectarea("Z16")
-						RECLOCK('Z16',.T.)
-							Z16->Z16_FILIAL	:= _aDados[01]
-							Z16->Z16_ETQPAL	:= _aDados[02]
-							//Z16->Z16_PLTORI := _aDados[03]
-							//Z16->Z16_UNITIZ	:= _aDados[04]
-							Z16->Z16_ETQPRD	:= _aDados[05]
-							Z16->Z16_CODPRO	:= _aDados[06]
-							Z16->Z16_QUANT	:= _aDados[07]
-							//Z16->Z16_QTSEGU := _aDados[08]
-							Z16->Z16_SALDO  := _aDados[09]
-							Z16->Z16_NUMSEQ	:= _aDados[10]
-							Z16->Z16_STATUS	:= "T" // V=Vazio / T=Total / P=Parcial
-							Z16->Z16_QTDVOL	:= 1
-							Z16->Z16_ENDATU := _aDados[13]
-							Z16->Z16_ORIGEM := "Z19"
-							Z16->Z16_LOCAL  := _aDados[15]
-							//Z16->Z16_TPESTO := _aDados[16]
-							Z16->Z16_CODBAR := _aDados[17]
-							Z16->Z16_EMBALA := ''//_aDados[18] VALIDAR (_xAlias2)->Z19_EMBALA
-							Z16->Z16_ETQVOL := _aDados[19]
-							Z16->Z16_VOLORI := _aDados[20]
-							Z16->Z16_PLTCLI := _aDados[21]
-							Z16->Z16_CARGA  := _aDados[22]
-							Z16->Z16_ONDSEP := _aDados[23]
-							Z16->Z16_PEDIDO := _aDados[24]
-							Z16->Z16_DATA   := Date()
-							Z16->Z16_HORA   := Time()
-							Z16->Z16_LOTCTL := _aDados[27]
-							//Z16->Z16_VLDLOT := _aDados[28] //StoD((_xAlias2)->Z19_VLDLOT)
-							//Z16->Z16_NUMSER := _aDados[29] //(_xAlias2)->Z19_NUMSER //VALIDAR
-							//Z16->Z16_DTSERI := _aDados[30] //StoD((_xAlias2)->Z19_DTSERI)//VALIDAR
-						Z16->(MsUnLock())		
-*/
-						aadd(_aReg,{'1',_aConf[(_xAliasA)->(Recno())][3],'Saldo alterado para '+AllTrim(Transform(_aConf[(_xAliasA)->(Recno())][3][8],pesqpict('Z16','Z16_SALDO')))+'.'})
-									
-				//	end transaction
+					EndIf
+					
+					END TRANSACTION
 				
 				
 					
-					//aadd(_aReg,_aConf[(_xAliasA)->(Recno())][3],'em validação - transferencia de etiqueta <br><br>'+varinfo('a',_aConf[(_xAliasA)->(Recno())]))
+					//aAdd(_aReg,_aConf[(_xAliasA)->(Recno())][3],'em validação - transferencia de etiqueta <br><br>'+varinfo('a',_aConf[(_xAliasA)->(Recno())]))
 				ElseIf(_aConf[(_xAliasA)->(Recno())][1]=='6')
 					//eecview(varinfo('b',_aConf[(_xAliasA)->(Recno())]),'Tipo de correção '+_aConf[(_xAliasA)->(Recno())][1])
 					//Corrige saldo Z16
 					
 					//COPIA A ETIQUETA ATUAL PARA LOST
+					dbselectarea("Z16")
+					Z16->(dbgoto(_aConf[(_xAliasA)->(Recno())][3][9]))
+					
+					BEGIN TRANSACTION
+	
+					RECLOCK('Z16',.F.)
+						Z16->Z16_ENDATU:=_aConf[(_xAliasA)->(Recno())][3][8]		
+					Z16->(MSUNLOCK())
+					
+					aAdd(_aReg,{'1',_aConf[(_xAliasA)->(Recno())][3],'Saldo alterado para '+AllTrim(Transform(_aConf[(_xAliasA)->(Recno())][3][8],pesqpict('Z16','Z16_SALDO')))+'.'})
+				
+					END TRANSACTION
 					
 					
-					//aadd(_aReg,{'1',_aConf[(_xAliasA)->(Recno())][3],'Etiqueta Transferida para '+_aConf[(_xAliasA)->(Recno())][2][1][7]	})
-				else
+					//aAdd(_aReg,{'1',_aConf[(_xAliasA)->(Recno())][3],'Etiqueta Transferida para '+_aConf[(_xAliasA)->(Recno())][2][1][7]	})
+				Else
 					//eecview(varinfo('a',_aConf[(_xAliasA)->(Recno())]),'Tipo de correção '+_aConf[(_xAliasA)->(Recno())][1])
-					aadd(_aReg,_aConf[(_xAliasA)->(Recno())][3],'em validação - transferencia de etiqueta <br><br>'+varinfo('a',_aConf[(_xAliasA)->(Recno())]))				
+					aAdd(_aReg,_aConf[(_xAliasA)->(Recno())][3],'em validação - transferência de etiqueta <br><br>'+varinfo('a',_aConf[(_xAliasA)->(Recno())]))				
 				EndIf
 			EndIf
 			
@@ -3997,64 +4018,9 @@ _oDlg:bInit     := EnchoiceBar(_oDlg, {|| nOpcA:=1, _oDlg:End() },{|| _oDlg:End(
 
 Return _lRet
 
-//USER  function UF021E2(_xEnde,_XQuant)
-Static function sfTransfCriaEtiqueta(_xEnde,_XQuant,_xEtq,_xPal)
 
-
-Local _aArea1 := GETAREA()
-
-Default _xEnde := ''
-Default _xQuant := 0
-Default _xEtq := ''//getsxenum('Z11','Z11_CODETI',xFilial('Z11'))
-Default _xPal := ''//getsxenum('Z11','Z11_CODETI',xFilial('Z11'))
-
-Begin Transaction 
-
-	//CRIA ETIQUETA Z11
-
-	//copia da z16 para a variavel de memória
-	REGTOMEMORY("Z16",.F.)
-	
-	//pega os campos da SX3 para preenchimento automático
-	dbSelectArea("SX3")
-	SX3->(DbSetOrder(1))
-	SX3->(DbSeek("Z16"))
-
-	RecLock('Z16',.T.)
-		While (SX3->(!EOF() .AND. X3_ARQUIVO = 'Z16'))
-			If X3USO(SX3->X3_USADO) //SX3->X3_CAMPO
-				&('Z16->'+ALLTRIM(SX3->X3_CAMPO)) := &('M->'+ALLTRIM(SX3->X3_CAMPO))
-			EndIf// Z16->Z16_ETQPAL // M->Z16_ETQPAL
-			SX3->(DBSKIP())
-		EndDo
-		
-		//Atualiza os campos recebidos por parametro
-		Z16->Z16_FILIAL	:= M->Z16_FILIAL
-		Z16->Z16_DATA 	:= DATE()
-		Z16->Z16_HORA	:= TIME()
-		Z16->Z16_ENDATU := _xEnde
-		Z16->Z16_SALDO  := _xQuant
-		Z16->Z16_VOLORI := M->Z16_ETQVOL
-		Z16->Z16_ETQVOL := _xEtq
-		Z16->Z16_ETQPAL := _xPal
-	
-	Z16->(MSUNLOCK())
-	
-	//MSGALERT('Z16 recno '+CVALTOCHAR(Z16->(RECNO())),'Criada Etiqueta '+_xEtq)
-	
-	confirmsx8()
-End Transaction
-	
-RESTAREA(_aArea1)
-	
-RETURN .t.
-
-
-
-
-
-
-USER FUNCTION UF021E()
+//Teste de inserção de etiqueta
+USER FUNCTION FT021E()
 Local aLista := {}
 Local _lRet := .T.
 
@@ -4066,7 +4032,7 @@ Local _lRet := .T.
 		//MSGALERT(VARINFO('aLista',aLista),'UF021T')
 			
 		//If(sfTransfCriaEtiqueta('02B10010065501',4))
-		If(u_UF021E2('02B10010065501',4))
+		If(u_FT021E2('02B10010065501',4))
 			//transferencia realizada
 			_lRet := .T.
 		Else
@@ -4076,6 +4042,133 @@ Local _lRet := .T.
 	//MSGALERT('APOS sfMata261','UF021T')
 	EndIf
 
-	
-
 Return _lRet
+
+User Function FT021E2(_xEnde,_XQuant) // PARA CHAMAR ROTINA DE TESTE DE INSERÇÃO DE ETIQUETA
+Static Function sfTransfCriaEtiqueta(_xEnde,_XQuant)
+
+Local _lRet := .T.
+Local _aArea1 := GETAREA()
+local _aMonEtiq := NIL
+
+Default _xEnde := ''
+Default _xQuant := 0
+Default _xEtqVol := ''//FtGrvEtq('03',{})//getsxenum('Z11','Z11_CODETI',xFilial('Z11'))
+Default _xEtqPrd := ''//FtGrvEtq('03',{})//getsxenum('Z11','Z11_CODETI',xFilial('Z11'))
+Default _xEtqPal := ''//FtGrvEtq('04',{})getsxenum('Z11','Z11_CODETI',xFilial('Z11'))
+
+Begin Transaction 
+	
+	//copia da Z16 para a memória
+	REGTOMEMORY("Z16",.F.)
+
+	//CRIA ETIQUETA Z11 - volume
+	Z11->(DBSETORDER(1))
+	If(!empty(M->Z16_ETQVOL))
+		/*#TODO: Validar utilização dos campos de Volume de produto abaixo*/
+		_aMonEtiq := {"","","","","","","","","","","","",0,0}
+		_aMonEtiq[01]:=Z11->Z11_CLIENT
+		_aMonEtiq[02]:=Z11->Z11_LOJA
+		_aMonEtiq[03]:=Z11->Z11_PROCES
+		_aMonEtiq[04]:=Z11->Z11_CESV
+		_aMonEtiq[05]:=Z11->Z11_DOC
+		_aMonEtiq[06]:=Z11->Z11_SERIE
+		_aMonEtiq[07]:=Z11->Z11_TIPONF
+		_aMonEtiq[08]:=Z11->Z11_ITEMNF
+		_aMonEtiq[09]:=Z11->Z11_CODPRO
+		_aMonEtiq[10]:=Z11->Z11_NUMSEQ
+		_aMonEtiq[11]:=Z11->Z11_SEQKIT
+		_aMonEtiq[12]:=Z11->Z11_CODKIT
+		_aMonEtiq[13]:=Z11->Z11_QTD1
+		_aMonEtiq[14]:=Z11->Z11_QTD2
+		If(Z11->(DBSEEK(xFilial('Z11')+M->Z16_ETQVOL)))
+			_xEtqVol := U_FtGrvEtq(Z11->Z11_TIPO,_aMonEtiq)
+		Else
+			_lRet := .f.
+		EndIf 
+	ENDIF
+	//CRIA ETIQUETA Z11 - produto
+	If(!empty(M->Z16_ETQPRD))
+		_aMonEtiq := {"","","","","","","","","","",0,0,""}
+		/*#TODO: Validar utilização dos campos de etiqueta de produto abaixo*/
+		_aMonEtiq[01]:=Z11->Z11_CLIENT
+		_aMonEtiq[02]:=Z11->Z11_LOJA
+		_aMonEtiq[03]:=Z11->Z11_TIPONF
+		_aMonEtiq[04]:=Z11->Z11_DOC
+		_aMonEtiq[05]:=Z11->Z11_SERIE
+		_aMonEtiq[06]:=Z11->Z11_ITEMNF
+		_aMonEtiq[07]:=Z11->Z11_CODPRO
+		_aMonEtiq[08]:=Z11->Z11_NUMSEQ
+		_aMonEtiq[09]:=Z11->Z11_PROCES
+		_aMonEtiq[10]:=Z11->Z11_CESV
+		_aMonEtiq[11]:=Z11->Z11_QTD1
+		_aMonEtiq[12]:=Z11->Z11_QTD2
+		_aMonEtiq[13]:=Z11->Z11_CARGA
+		If(Z11->(DBSEEK(xFilial('Z11')+M->Z16_ETQPRD)))
+			_xEtqPrd := U_FtGrvEtq(Z11->Z11_TIPO,_aMonEtiq)
+		Else
+			_lRet := .f.
+		EndIf
+	ENDIF
+	
+	//CRIA ETIQUETA Z11 - pallet	
+	If(!empty(M->Z16_ETQPAL))
+		_aMonEtiq := {"",""}
+		_aMonEtiq[01]:=Z11->Z11_UNITIZ
+		_aMonEtiq[02]:=Z11->Z11_CARGA
+		/*#TODO: Validar utilização dos campos de etiqueta de pallet abaixo*/
+		If(Z11->(DBSEEK(xFilial('Z11')+M->Z16_ETQPAL)))
+			_xEtqPal := U_FtGrvEtq(Z11->Z11_TIPO,_aMonEtiq)
+		Else
+			_lRet := .f.
+		EndIf
+	ENDIF
+	
+	//pega os campos da SX3 para preenchimento automático
+	If(_lRet)
+		dbSelectArea("SX3")
+		SX3->(DbSetOrder(1))
+		SX3->(DbSeek("Z16"))
+
+		RecLock('Z16',.T.)
+			While (SX3->(!EOF() .AND. X3_ARQUIVO = 'Z16'))
+				If X3USO(SX3->X3_USADO) //SX3->X3_CAMPO
+					&('Z16->'+ALLTRIM(SX3->X3_CAMPO)) := &('M->'+ALLTRIM(SX3->X3_CAMPO))
+				EndIf// Z16->Z16_ETQPAL := M->Z16_ETQPAL
+				SX3->(DBSKIP())
+			EndDo
+			
+			//Atualiza os campos recebidos por parametro
+			Z16->Z16_FILIAL	:= M->Z16_FILIAL
+			Z16->Z16_DATA 	:= DATE()
+			Z16->Z16_HORA	:= TIME()
+			Z16->Z16_ENDATU := _xEnde
+			Z16->Z16_QTDVOL := _xQuant
+			Z16->Z16_QUANT	:= _xQuant
+			Z16->Z16_SALDO  := _xQuant
+			Z16->Z16_VOLORI := M->Z16_ETQVOL
+			Z16->Z16_ETQPRD := _xEtqPrd
+			Z16->Z16_ETQVOL := _xEtqVol
+			Z16->Z16_ETQPAL := _xEtqPal
+		Z16->(MSUNLOCK())
+		//criada Z16 pela rotina de divergência de armazem
+		
+	
+	EndIf
+
+	//MSGALERT('Z16 recno '+CVALTOCHAR(Z16->(RECNO())),'Criada Etiqueta '+_xEtq)
+If(!_lRet) 
+	DisarmTransaction()
+	//confirmsx8()
+EndIf
+
+End Transaction
+	
+RESTAREA(_aArea1)
+	
+Return _lRet
+
+
+
+
+
