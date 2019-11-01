@@ -17,5 +17,9 @@
 User Function F050ROT
 local _aNewRot := ParamIxb
 // inclui opcao para relacionar processo ao titulo
-aAdd(_aNewRot,{"Define Processo","U_TFINA002(SE2->E2_VALOR,.f.)",0,4,,.F.})
+	/*Andre Sakai - Projeto de Atualização p12*/
+	//PE apresenta erro no funções contas a pagar - já atendido pelo pe FA750BRW
+	//If(!FWIsInCallStack('FINA750'))
+		aAdd(_aNewRot,{"Define Processo","U_TFINA002(SE2->E2_VALOR,.f.)",0,4})
+	//EndIf
 Return(_aNewRot)

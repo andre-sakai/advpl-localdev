@@ -2286,6 +2286,7 @@ Static Function Mbrwsc7(_cCodCc,_cCodItem,_cDataRef,_cAlcada,_cUser,_cPCscNUM)
 	aAdd(_aPcCamp,{"C7_ZNIVRAP"    	,"C", TamSx3("C7_ZNIVRAP")[1],0})
 	aAdd(_aPcCamp,{"C7_ZALCAPR"    	,"C", TamSx3("C7_ZALCAPR")[1],0})
 	aAdd(_aPcCamp,{"C7_ZNIVAPR"    	,"C", TamSx3("C7_ZNIVAPR")[1],0})
+	aAdd(_aPcCamp,{"C7_NOME"    	,"C", TamSx3("DCD_NOMFUN")[1],0})
 
 	// fecha alias da solicitação de compra
 	If (Select(_cTabPc)<>0)
@@ -2299,13 +2300,15 @@ Static Function Mbrwsc7(_cCodCc,_cCodItem,_cDataRef,_cAlcada,_cUser,_cPCscNUM)
 	
 	_cQryPesCv := " SELECT C7_FILIAL, C7_NUM, C7_ITEM, C7_PRODUTO, C7_DESCRI, C7_CC, C7_ITEMCTA, C7_UM, C7_QUANT, C7_PRECO, C7_TOTAL, "
 	_cQryPesCv += " C7_DATPRF, C7_EMISSAO, "
-	_cQryPesCv += " Case When DCD_NOMFUN IS NULL Then 'Cadastrar ID no WMS: '+C7_ZUSRSC Else DCD_NOMFUN End as Nome, "
+	_cQryPesCv += " Case When DCD_NOMFUN IS NULL Then 'Cadastrar ID no WMS: '+C7_ZUSRSC Else DCD_NOMFUN End as C7_NOME, "
 	_cQryPesCv += " C7_NUMSC, C7_ITEMSC, C7_FORNECE, C7_LOJA, C7_ZINFADI, C7_CONAPRO, C7_ZALCRAP, C7_ZNIVRAP, C7_ZALCAPR, C7_ZNIVAPR "
 	_cQryPesCv += " FROM "+RetSQLName("SC7")+" SC7 (nolock) "
 	
 	_cQryPesCv += " Inner join "+RetSQLName("SF4")+" SF4 (nolock) "
 	_cQryPesCv += " on SF4.D_E_L_E_T_ = '' "
-	_cQryPesCv += " and F4_FILIAL = "+xFilial("SF4")+" "
+	_cQryPesCv += " and F4_FILIAL = '"+xFilial("SF4")+"' "
+	// codigo da TES / com financeiro
+	_cQryPesCv += "	AND C7_TES = SF4.F4_CODIGO AND SF4.F4_DUPLIC = 'S' "
 	
 	_cQryPesCv += " Left join "+RetSQLName("DCD")+" DCD (nolock) "
 	_cQryPesCv += " on DCD.D_E_L_E_T_ = '' "
@@ -2315,8 +2318,6 @@ Static Function Mbrwsc7(_cCodCc,_cCodItem,_cDataRef,_cAlcada,_cUser,_cPCscNUM)
 	_cQryPesCv += " WHERE SC7.D_E_L_E_T_ = '' "
 	// controle de alcadas e eliminados por resido
 	_cQryPesCv += "	AND C7_ZCONTAL <> 'X' AND C7_RESIDUO <> 'S' "
-	// codigo da TES / com financeiro
-	_cQryPesCv += "	AND C7_TES = SF4.F4_CODIGO AND SF4.F4_DUPLIC = 'S' "
 	// centro de custo
 	_cQryPesCv += " AND C7_CC = '"+_cCodCc+"' "
 	// item contabil
@@ -2369,7 +2370,7 @@ Static Function Mbrwsc7(_cCodCc,_cCodItem,_cDataRef,_cAlcada,_cUser,_cPCscNUM)
 		(_cTabPc)->C7_TOTAL,;
 		(_cTabPc)->C7_DATPRF,;
 		(_cTabPc)->C7_EMISSAO,;
-		AllTrim((_cTabPc)->Nome),;
+		AllTrim((_cTabPc)->C7_NOME),;
 		(_cTabPc)->C7_NUMSC,;
 		(_cTabPc)->C7_ITEMSC,;
 		(_cTabPc)->C7_FORNECE,;

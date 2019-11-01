@@ -270,9 +270,16 @@ Static Function sfAtuProduto()
 
 	// atualiza o browse
 	// 1 aba
+	If(Len(_aTmpDados)=0)
+		_aTmpDados := {{"","",.f.}}
+	EndIf
 	_oBrwDetCons:aCols := aClone(_aTmpDados)
 	_oBrwDetCons:oBrowse:Refresh()
+	
 	// 2 aba
+	If(Len(_aTmpAdic)=0)
+		aAdd(_aTmpAdic,{"","",.f.})
+	EndIf
 	_oBrwDetAdic:aCols := aClone(_aTmpAdic)
 	_oBrwDetAdic:oBrowse:Refresh()
 
@@ -389,6 +396,10 @@ Static Function sfAtuEndereco()
 	RestArea(_aArea)
 
 	// atualiza o browse
+	If(Len(_aTmpDados)=0)
+		aAdd(_aTmpDados,{"","",.f.})
+	EndIf
+	
 	_oBrwDetCons:aCols := aClone(_aTmpDados)
 	_oBrwDetCons:oBrowse:Refresh()
 
@@ -437,6 +448,10 @@ Static Function sfAtuPalete()
 	dbCloseArea()
 
 	// atualiza o browse
+	if(Len(_aTmpDados)=0)
+		_aTmpDados := {{"","",.f.}}
+	endif
+
 	_oBrwDetCons:aCols := aClone(_aTmpDados)
 	_oBrwDetCons:oBrowse:Refresh()
 
@@ -768,10 +783,18 @@ Static Function sfAtuVolume()
 
 	// atualiza a tela
 	// 1 aba
+	If(len(_aTmpDados)=0)
+		aAdd(_aTmpDados,{"","",.f.})
+	EndIf
+	
 	_oBrwDetCons:aCols := aClone(_aTmpDados)
 	_oBrwDetCons:oBrowse:Refresh()
 
 	// 2 aba
+	If(len(_aTmpAdic)=0)
+		aAdd(_aTmpAdic,{"","",.f.})
+	EndIf
+	
 	_oBrwDetAdic:aCols := aClone(_aTmpAdic)
 	_oBrwDetAdic:oBrowse:Refresh()
 

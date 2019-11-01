@@ -2474,7 +2474,7 @@ Static Function sfInicMovim(mvQryUsr)
 	local _oWndInicMov
 	local _oPnInMvCb, _oPnInMvRd
 	local _oPnInMvFld
-	local _oBmpInicMovSair, _oBmpOpcoes, _oBmpRefresh
+	local _oBmpInicMSair, _oBmpOpcoes, _oBmpRefresh
 	local _oGetIdEtiq
 	local _oFldPltDisp
 	local _oBrwPltRec, _oBrwPltExp, _oBrwPltInt
@@ -2520,6 +2520,8 @@ Static Function sfInicMovim(mvQryUsr)
 	aAdd(_aStPltRec,{"REC_ENDORI" ,"C", 16,0})
 	aAdd(_aStPltRec,{"REC_QTD"    ,"N", TamSx3("C6_QTDVEN")[1] ,TamSx3("C6_QTDVEN")[2]})
 	aAdd(_aStPltRec,{"REC_ORDEM"  ,"C", TamSx3("BE_LOCALIZ")[1] ,0})
+	
+	
 
 	// cria arquivo de trabalho
 	_cTrPltRec := FWTemporaryTable():New( _cAlPltRec )
@@ -2601,21 +2603,6 @@ Static Function sfInicMovim(mvQryUsr)
 
 	//=================
 
-	// sub-itens do menus
-	_oMnuOpcoes := TMenu():New(0,0,0,0,.T.)
-	// adiciona itens no Menu
-
-	// -- FILTRAR RUAS DISPONIVEIS
-	_oSbMnOpc1 := TMenuItem():New(_oMnuOpcoes,"Filtrar Rua",,,,{|| sfFiltroRua(),_oBmpRefresh:Click() },,"FILTRO",,,,,,,.T.)
-	_oMnuOpcoes:Add(_oSbMnOpc1)
-
-	// -- CONSULTAR FEIRINHA
-	_oSbMnOpc2 := TMenuItem():New(_oMnuOpcoes,"Coleta Atual",,,,{|| sfFeiraAtual(),_oBmpRefresh:Click() },,"AVGBOX1",,,,,,,.T.)
-	_oMnuOpcoes:Add(_oSbMnOpc2)
-
-	// -- CONSULTAR ETIQUETA
-	_oSbMnOpc3 := TMenuItem():New(_oMnuOpcoes,"Cons.Etiq.",,,,{|| U_TWMSA015() },,"ACDIMG32",,,,,,,.T.)
-	_oMnuOpcoes:Add(_oSbMnOpc3)
 
 	// apresenta tela para selecionar um palete/endereço
 	_oWndInicMov := MSDialog():New(000,000,_aSizeDlg[2],_aSizeDlg[1],"Movim.Mercadoria",,,.F.,,,,,,.T.,,,.T. )
@@ -2629,14 +2616,32 @@ Static Function sfInicMovim(mvQryUsr)
 	_oBmpRefresh := TBtnBmp2():New(000,000,040,040,"RELOAD",,,,{|| sfAtuDados(mvQryUsr, (_cAlPltRec), (_cAlPltExp), (_cAlPltInt), @_oGetIdEtiq) },_oPnInMvCb,"Atualizar",,.T.)
 	_oBmpRefresh:Align := CONTROL_ALIGN_LEFT
 
+
+	// sub-itens do menus
+	_oMnuOpcoes := TMenu():New(0,0,0,0,.T.)
+	// adiciona itens no Menu
+
+	// -- FILTRAR RUAS DISPONIVEIS
+	_oSbMnOpc1 := TMenuItem():New(_oPnInMvCb,"Filtrar Rua",,,,{|| sfFiltroRua(),_oBmpRefresh:Click() },,"FILTRO",,,,,,,.T.)
+	_oMnuOpcoes:Add(_oSbMnOpc1)
+
+	// -- CONSULTAR FEIRINHA
+	_oSbMnOpc2 := TMenuItem():New(_oPnInMvCb,"Coleta Atual",,,,{|| sfFeiraAtual(),_oBmpRefresh:Click() },,"AVGBOX1",,,,,,,.T.)
+	_oMnuOpcoes:Add(_oSbMnOpc2)
+
+	// -- CONSULTAR ETIQUETA
+	_oSbMnOpc3 := TMenuItem():New(_oPnInMvCb,"Cons.Etiq.",,,,{|| U_TWMSA015(),_oBmpRefresh:Click() },,"ACDIMG32",,,,,,,.T.)
+	_oMnuOpcoes:Add(_oSbMnOpc3)
+
+
 	// -- BOTAO COM MAIS OPCOES
-	_oBmpOpcoes := TBtnBmp2():New(000,000,060,022,"SDUAPPEND",,,,{|| Nil },_oPnInMvCb,"",,.T.)
+	_oBmpOpcoes := TBtnBmp2():New(000,000,060,022,"SDUAPPEND",,,,{||},_oPnInMvCb,"",{||})
 	_oBmpOpcoes:Align := CONTROL_ALIGN_LEFT
 	_oBmpOpcoes:SetPopupMenu(_oMnuOpcoes)
 
 	// -- INTERROMPER
-	_oBmpInicMovSair := TBtnBmp2():New(000,000,040,040,"FINAL",,,,{|| _lRet := .F., _lFixaWnd := sfComColeta(), _oWndInicMov:End()  },_oPnInMvCb,"Sair",,.T.)
-	_oBmpInicMovSair:Align := CONTROL_ALIGN_RIGHT
+	_oBmpInicMSair := TBtnBmp2():New(000,000,040,040,"FINAL",,,,{|| _lRet := .F., _lFixaWnd := sfComColeta(), _oWndInicMov:End()  },_oPnInMvCb,"Sair",,.T.)
+	_oBmpInicMSair:Align := CONTROL_ALIGN_RIGHT
 
 	// cria o panel para o Folder/pastas
 	_oPnInMvFld := TPanel():New(000,000,nil,_oWndInicMov,,.F.,.F.,,,110,110,.T.,.F.)
@@ -2692,7 +2697,14 @@ Static Function sfInicMovim(mvQryUsr)
 Return(_lRet)
 
 // ** mostra todos os produtos coletados para a feirinha
-Static Function sfFeiraAtual()
+user Function FeiraAtual()
+
+	msgalert('teste de feria atual','teste')
+	
+return .t.
+
+
+static Function sfFeiraAtual()//sfFeiraAtual()
 	// variavel de controle
 	local _lRet      := .F.
 	// objetos locais
@@ -2702,8 +2714,11 @@ Static Function sfFeiraAtual()
 	// define o acols
 	local _aColsFei  := sfARetFeira()
 
+	
+	memowrit("C:\query\twmsa011_sfARetFeira_var.txt",varinfo('_aColsFei',_aColsFei))
+	
 	// se não tiver nenhuma info ele
-	If ( Len(_aColsFei) == 0 )
+	If ( len(_aColsFei) = 0)
 		U_FtWmsMsg("Não há coleta pendente.")
 		Return .F.
 	EndIf
@@ -2739,6 +2754,7 @@ Static Function sfFeiraAtual()
 Return (_lRet)
 
 // ** função que retorna o array de pedidos
+//user Function sfARetFeira()
 Static Function sfARetFeira()
 	// array que vai receber os dados
 	local _aFeira := {}
@@ -2774,6 +2790,8 @@ Static Function sfARetFeira()
 
 	// informação para debug
 	memowrit("C:\query\twmsa011_sfARetFeira.txt",_cQuery)
+	memowrit("C:\query\twmsa011_sfARetFeira2.txt",valtype(_aFeira))
+	memowrit("C:\query\twmsa011_sfARetFeira3.txt",varinfo('a'))
 
 	// retorno o array
 Return (_aFeira)

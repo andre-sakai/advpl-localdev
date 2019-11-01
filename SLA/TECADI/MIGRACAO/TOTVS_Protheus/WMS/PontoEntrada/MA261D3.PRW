@@ -34,7 +34,11 @@ User Function MA261D3
 	Local _cSeekSD3 := SD3->(D3_FILIAL + D3_DOC + D3_NUMSEQ)                     // indice 8
 	Local _cSeekSDB
 
-	// atualiza o registro - SD3
+	// atualiza os dados no movimento por lote - SDB
+	dbSelectArea("SDB")
+	SDB->(dbSetOrder(1)) // 1-DB_FILIAL, DB_PRODUTO, DB_LOCAL, DB_NUMSEQ, DB_DOC, DB_SERIE, DB_CLIFOR, DB_LOJA, DB_ITEM
+
+	// atualiza o registro - SD3 - retirada alteração de indice no whule - andre sakai
 	dbSelectArea("SD3")
 	SD3->(dbSetOrder(8)) // 8-D3_FILIAL, D3_DOC, D3_NUMSEQ
 
@@ -72,11 +76,8 @@ User Function MA261D3
 
 			// prepara dados para While no SDB
 			_cSeekSDB := SD3->(D3_FILIAL + D3_COD + D3_LOCAL + D3_NUMSEQ + D3_DOC) // indice 1
-
+			
 			// atualiza os dados no movimento por lote - SDB
-			dbSelectArea("SDB")
-			SDB->(dbSetOrder(1)) // 1-DB_FILIAL, DB_PRODUTO, DB_LOCAL, DB_NUMSEQ, DB_DOC, DB_SERIE, DB_CLIFOR, DB_LOJA, DB_ITEM
-
 			// posiciona no registro desejado
 			If SDB->(dbSeek( _cSeekSDB ))
 
