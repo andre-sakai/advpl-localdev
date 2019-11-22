@@ -20,7 +20,12 @@ user function altped()
 	_cTransp     := SC5->C5_TRANSP
 	_MsgNF       := SC5->C5_MENNOTA
 	_NUMPV		 := SC5->C5_NUM
-	_cMenPad	 := SC5->C5_MENPAD
+	_cMenPad	 := SC5->C5_MENPAD 
+	
+	_cFormPag	 := SC5->C5_CONDPAG 
+	
+	dDtSai		 := SC5->C5_ZDTSAI //stod('')
+	
 	//_cMenPad2	 := SC5->C5_MENPAD2
 	//_cMenPad3	 := SC5->C5_MENPAD3
 
@@ -48,7 +53,15 @@ user function altped()
 	//@ 131,010 Say " Msg. Pad. 2 : "
 	//@ 130,060 Get  _cMenpad3  Size 030,050 F3 "SM4" Valid Vazio().or.ExistCpo("SM4")
 	@ 121,010 Say " Msg na NF Saida: "
-	@ 120,060 Get  _MsgNF     Size 205,205             
+	@ 120,060 Get  _MsgNF     Size 205,205    
+	
+	@ 131,010 Say " Cond Pagamento : "
+	@ 130,060 Get  _cFormPag   Size 030,050 F3 "SE4" Valid Vazio().or.ExistCpo("SE4")  
+	
+	@ 141,010 Say " Dt de Saida   : "
+	@ 140,060 Get  dDtSai    Size 070,050 
+	
+	       
 
 	@ 180,130 BMPBUTTON TYPE 1 ACTION (GRAVA_C5(),Close(Odlg1))
 	@ 180,170 BMPBUTTON TYPE 2 ACTION Close(oDlg1)
@@ -67,7 +80,11 @@ Reclock("SC5",.F.)
    SC5->C5_ESPECI1 := _cEspeci1
    SC5->C5_TRANSP  := _cTransp
    SC5->C5_MENNOTA := _MsgNF  
-   SC5->C5_MENPAD  := _cMenPad   
+   SC5->C5_MENPAD  := _cMenPad
+   
+   SC5->C5_CONDPAG  := _cFormPag 
+   
+   SC5->C5_ZDTSAI  := dDtSai      
    //SC5->C5_MENPAD2 := _cMenPad2
    //SC5->C5_MENPAD3 := _cMenPad3
 MsUnlock()

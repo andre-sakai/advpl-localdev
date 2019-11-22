@@ -34,12 +34,22 @@ WHILE SC9-> ( !EOF() ) .AND. SC9->C9_PEDIDO == SC5->C5_NUM  .and.  SC9->C9_FILIA
 	Endif
 	
 	IF SC9->C9_BLCRED == '01' //SE ESTIVER BLOQUEADO POR CREDITO.
+		
 		DbSelectArea("SC5") 
 		Reclock("SC5",.F.)	
 			SC5->C5_BLQ  := '1'
 			SC5->C5_ZBLQ := '2'
+		Msunlock()  
+		
+	Elseif SC9->C9_BLEST <> '02'
+		
+		DbSelectArea("SC5") 
+		Reclock("SC5",.F.)	
+			SC5->C5_BLQ  := ' '
+			SC5->C5_ZBLQ := ' '
 		Msunlock()
-	Endif
+	
+	endif
 			
 	SC9 -> ( Dbskip() )
 	

@@ -80,6 +80,8 @@ Static Function fReportDef()
 	TRCell():New(oSectDad, "VENDEDOR", "QRY_AUX", "Vendedor", /*Picture*/, 70, /*lPixel*/,/*{|| code-block de impressao }*/,/*cAlign*/,/*lLineBreak*/,/*cHeaderAlign */,/*lCellBreak*/,/*nColSpace*/,/*lAutoSize*/,/*nClrBack*/,/*nClrFore*/,/*lBold*/)
 	TRCell():New(oSectDad, "CLIENTE", "QRY_AUX", "Cliente", /*Picture*/, 10, /*lPixel*/,/*{|| code-block de impressao }*/,/*cAlign*/,/*lLineBreak*/,/*cHeaderAlign */,/*lCellBreak*/,/*nColSpace*/,/*lAutoSize*/,/*nClrBack*/,/*nClrFore*/,/*lBold*/)
 	TRCell():New(oSectDad, "A1_NOME", "QRY_AUX", "Nome Cliente", /*Picture*/, 70, /*lPixel*/,/*{|| code-block de impressao }*/,/*cAlign*/,/*lLineBreak*/,/*cHeaderAlign */,/*lCellBreak*/,/*nColSpace*/,/*lAutoSize*/,/*nClrBack*/,/*nClrFore*/,/*lBold*/)
+	TRCell():New(oSectDad, "A1_EST", "QRY_AUX", "Estado", /*Picture*/, 70, /*lPixel*/,/*{|| code-block de impressao }*/,/*cAlign*/,/*lLineBreak*/,/*cHeaderAlign */,/*lCellBreak*/,/*nColSpace*/,/*lAutoSize*/,/*nClrBack*/,/*nClrFore*/,/*lBold*/)
+	TRCell():New(oSectDad, "A1_MUN", "QRY_AUX", "Municipio", /*Picture*/, 70, /*lPixel*/,/*{|| code-block de impressao }*/,/*cAlign*/,/*lLineBreak*/,/*cHeaderAlign */,/*lCellBreak*/,/*nColSpace*/,/*lAutoSize*/,/*nClrBack*/,/*nClrFore*/,/*lBold*/)
 	TRCell():New(oSectDad, "NOTA", "QRY_AUX", "Nota", /*Picture*/, 9, /*lPixel*/,/*{|| code-block de impressao }*/,/*cAlign*/,/*lLineBreak*/,/*cHeaderAlign */,/*lCellBreak*/,/*nColSpace*/,/*lAutoSize*/,/*nClrBack*/,/*nClrFore*/,/*lBold*/)
 	TRCell():New(oSectDad, "TABELA", "QRY_AUX", "TABELA", /*Picture*/, 9, /*lPixel*/,/*{|| code-block de impressao }*/,/*cAlign*/,/*lLineBreak*/,/*cHeaderAlign */,/*lCellBreak*/,/*nColSpace*/,/*lAutoSize*/,/*nClrBack*/,/*nClrFore*/,/*lBold*/)
 	TRCell():New(oSectDad, "EMISSAO", "QRY_AUX", "EMISSAO", /*Picture*/, 9, /*lPixel*/,/*{|| code-block de impressao }*/,/*cAlign*/,/*lLineBreak*/,/*cHeaderAlign */,/*lCellBreak*/,/*nColSpace*/,/*lAutoSize*/,/*nClrBack*/,/*nClrFore*/,/*lBold*/)
@@ -109,7 +111,7 @@ Static Function fRepPrint(oReport)
 
 	//Montando consulta de dados   
 	
-/*
+
 	
 	cQryAux := ""
 	cQryAux := " SELECT  " 
@@ -119,11 +121,13 @@ Static Function fRepPrint(oReport)
 	cQryAux += " SF2.F2_CLIENTE CLIENTE, " 
 	cQryAux += " SF2.F2_LOJA LOJA, "
 	cQryAux += " SA1.A1_NOME, "
+	cQryAux += " SA1.A1_EST, "
+	cQryAux += " SA1.A1_MUN, "
 	cQryAux += " SC5.C5_VEND1 ,  "
 	cQryAux += " SC5.C5_NUM, "	
 	cQryAux += " SC5.C5_TABELA TABELA, "
 	cQryAux += " SF2.F2_EMISSAO EMISSAO, "	
-	cQryAux += " SF2.F2_VALMERC  VALMERC "
+	cQryAux += " ( SF2.F2_VALMERC  - SF2.F2_VALICM  ) VALMERC "
 	cQryAux += " FROM " + RetSqlName("SF2") + " SF2 "
 	cQryAux += " 	INNER JOIN " + RetSqlName("SC5") + " SC5 ON SC5.C5_FILIAL = SF2.F2_FILIAL AND "
 	cQryAux += " 		SC5.C5_NOTA = SF2.F2_DOC  "	
@@ -136,49 +140,7 @@ Static Function fRepPrint(oReport)
 	cQryAux += " SF2.F2_EMISSAO  BETWEEN '" + DToS(MV_PAR01) + "' AND '" + DToS(MV_PAR02) + "'  "	
 	cQryAux += " ORDER BY SC5.C5_FILIAL, SA3.A3_NOME, SF2.F2_EMISSAO, SF2.F2_CLIENTE "  
 	cQryAux := ChangeQuery(cQryAux)
-*/
-    //Cesar - SLA 19/11/2018 - Eliminar linhas duplicadas por cliente com mais de uma filial e pedidos diferentes faturados na mesma nota fiscal.
-	cQryAux := ""
-	cQryAux += " SELECT " 
-	cQryAux += " SF2.F2_FILIAL FILIAL, "
-	cQryAux += " SF2.F2_DOC  NOTA, "   
-	cQryAux += " SF2.F2_SERIE, " 
-	cQryAux += " SA3.A3_NOME VENDEDOR, " 
-	cQryAux += " SF2.F2_CLIENTE CLIENTE, " 
-	cQryAux += " SF2.F2_LOJA LOJA, " 
-	cQryAux += " SA1.A1_NOME, "
-	cQryAux += " SC5.C5_VEND1 , "  
-	cQryAux += " SC5.C5_NUM, " 	
-	cQryAux += " SC5.C5_TABELA TABELA, " 
-	cQryAux += " SF2.F2_EMISSAO EMISSAO, " 	
-	cQryAux += " SUM(SD2.D2_TOTAL)  VALMERC "
-	cQryAux += " FROM " + RetSqlName("SF2") + " SF2 "
-	cQryAux += " INNER JOIN " + RetSqlName("SD2") + " SD2 ON " 
-	cQryAux += " SD2.D2_FILIAL = SF2.F2_FILIAL "
-	cQryAux += " AND SD2.D2_DOC = SF2.F2_DOC "
-	cQryAux += " AND SD2.D2_SERIE = SF2.F2_SERIE "
-	cQryAux += " AND SD2.D2_CLIENTE = SF2.F2_CLIENTE "
-	cQryAux += " AND SD2.D2_LOJA = SF2.F2_LOJA "
-	cQryAux += " INNER JOIN " + RetSqlName("SC5") + " SC5 ON "
-	cQryAux += " SC5.C5_FILIAL = SD2.D2_FILIAL "
-	cQryAux += " AND SC5.C5_NUM = SD2.D2_PEDIDO	"
-	cQryAux += " INNER JOIN " + RetSqlName("SA3") + " SA3 ON  "
-	cQryAux += " SA3.A3_COD = SC5.C5_VEND1 "   
-	cQryAux += " INNER JOIN " + RetSqlName("SA1") + " SA1 ON  "
-	cQryAux += " SA1.A1_COD = SF2.F2_CLIENTE " 
-	cQryAux += " AND SA1.A1_LOJA = SF2.F2_LOJA "   
-	cQryAux += " WHERE SF2.D_E_L_E_T_ = ' ' "
-	cQryAux += " AND SD2.D_E_L_E_T_ = ' ' "
-	cQryAux += " AND SC5.D_E_L_E_T_ = ' ' "   
-	cQryAux += " AND SA3.D_E_L_E_T_ = ' ' "
-	cQryAux += " AND SA1.D_E_L_E_T_ = ' ' "
-	cQryAux += " AND SF2.F2_TIPO = 'N' "
-	cQryAux += " AND SF2.F2_DUPL <> ' ' "
-	cQryAux += " AND SC5.C5_VEND1 BETWEEN '" + MV_PAR03 + "' AND '" + MV_PAR04 + "' "
-	cQryAux += " AND SF2.F2_EMISSAO  BETWEEN '" + DToS(MV_PAR01) + "' AND '" + DToS(MV_PAR02) + "'  "	
-	cQryAux += " GROUP BY SF2.F2_FILIAL, SF2.F2_DOC, SF2.F2_SERIE, SA3.A3_NOME, SF2.F2_CLIENTE, SF2.F2_LOJA, SA1.A1_NOME, SC5.C5_VEND1, SC5.C5_NUM, SC5.C5_TABELA, SF2.F2_EMISSAO "  
-	cQryAux += " ORDER BY  F2_FILIAL, A3_NOME, F2_EMISSAO, F2_CLIENTE " 
-	
+
 	//Executando consulta e setando o total da régua
 	TCQuery cQryAux New Alias "QRY_AUX"
 	Count to nTotal

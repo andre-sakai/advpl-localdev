@@ -109,6 +109,11 @@ if len(aprod)>0
 		oProcess:Start()
 		oProcess:Finish()  
 
+else
+  		dbSelectArea("SC5")
+		RecLock("SC5", .F.) 		
+			SC5->C5_BLPRECO := ' '		
+		MsUnLock("SC5")
 endif
 
 Return
