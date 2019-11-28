@@ -1,0 +1,489 @@
+Group Arteplas
+   Version=7.0
+   VSSDB=
+   HasProperties=1
+   Properties
+      BeforeApply=
+      AfterApply=
+      Icon=
+      ID=
+      Version=
+      PalmName=
+      OutPut=
+   End
+   ProjectsCount=8
+   Project Faturamento
+      FoldersCount=7
+      Folder Atualizacoes
+         VSSPath=Atualizacoes
+         FilesCount=9
+         File F:\ARTEPLAS\RDMAKE\Converte\ART021.prw
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART020.PRW
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART025.PRW
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART026.PRW
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART016.PRW
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART126.prw
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART125.prw
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\MSD2460.prw
+             Type=T
+         End
+         File F:\Arteplas\rdmake\Converte\ART151.PRW
+             Type=T
+         End
+      End
+      Folder Consultas
+         VSSPath=Consultas
+         FilesCount=0
+      End
+      Folder Relatorios
+         VSSPath=Relatorios
+         FilesCount=25
+         File F:\ARTEPLAS\RDMAKE\Converte\ART007_AP5.PRX
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART003_AP5.PRX
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART004_AP5.PRX
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART006_AP5.PRX
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART009_AP5.PRX
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART010_AP5.PRX
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\Art014_AP5.prx
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART013_AP5.PRX
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART011_AP5.PRX
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\art015_AP5.prx
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\MIN044_AP5.PRW
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\MIN045_AP5.PRW
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\rio034_AP5.prx
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\Rio033_AP5.prx
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\KRO010_AP5.PRW
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\Dupli_AP5.prx
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\Art001.prx
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\Art002.prx
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART005.PRX
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\Arte02.PRW
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART012_AP5.PRX
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\sec041.prw
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART150.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\art302.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART152.PRW
+             Type=T
+         End
+      End
+      Folder Miscelanea
+         VSSPath=Miscelanea
+         FilesCount=1
+         File \Arteplas\rdmake\Converte\Art172.prw
+             Type=T
+         End
+      End
+      Folder EDI
+         VSSPath=EDI
+         FilesCount=3
+         File F:\ARTEPLAS\RDMAKE\Converte\FRE132a_AP5.PRW
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\Fre024.prw
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\FRE132_AP5.PRW
+             Type=T
+         End
+      End
+      Folder Cadastro
+         VSSPath=Cadastro
+         FilesCount=4
+         File F:\ARTEPLAS\RDMAKE\Converte\ART023.PRW
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART022.PRW
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART024.PRW
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\art108.prw
+             Type=T
+         End
+      End
+      Folder Previsao de Vendas
+         VSSPath=Previsao de Vendas
+         FilesCount=2
+         File F:\ARTEPLAS\RDMAKE\Converte\Mt241tok.prw
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\art107.prw
+             Type=T
+         End
+      End
+   End
+   Project Financeiro
+      FoldersCount=5
+      Folder Atualizacoes
+         VSSPath=Atualizacoes
+         FilesCount=1
+         File F:\ARTEPLAS\RDMAKE\Converte\Art127.prw
+             Type=T
+         End
+      End
+      Folder Consultas
+         VSSPath=Consultas
+         FilesCount=0
+      End
+      Folder Miscelanea
+         VSSPath=Miscelanea
+         FilesCount=1
+         File F:\ARTEPLAS\RDMAKE\Converte\Art030.prw
+             Type=T
+         End
+      End
+      Folder Rdmake
+         VSSPath=Rdmake
+         FilesCount=4
+         File F:\ARTEPLAS\RDMAKE\Converte\Art104.prw
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\Art105.prw
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\art106.prx
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\MSE2530.prw
+             Type=T
+         End
+      End
+      Folder Comissoes
+         VSSPath=Comissoes
+         FilesCount=7
+         File F:\ARTEPLAS\RDMAKE\Converte\ART111.prw
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\Calcom.prw
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART112.prw
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\art113.prw
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART115.prw
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\Acr004.prw
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART116.prw
+             Type=T
+         End
+      End
+   End
+   Project Excel
+      FoldersCount=1
+      Folder Contabil
+         VSSPath=Contabil
+         FilesCount=5
+         File F:\ARTEPLAS\RDMAKE\Converte\getslini_AP5.prx
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\getcred_AP5.prx
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\getdeb_AP5.prx
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\getpar_AP5.prx
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\Getconta_AP5.prx
+             Type=T
+         End
+      End
+   End
+   Project Fiscal
+      FoldersCount=4
+      Folder GIA
+         VSSPath=GIA
+         FilesCount=5
+         File F:\ARTEPLAS\RDMAKE\Converte\GIASC_~1.PRX
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\GIACTB~1.PRX
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\GIAINF~1.PRX
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\GIAINI~1.PRX
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\GIAPER~1.PRX
+             Type=T
+         End
+      End
+      Folder Livros
+         VSSPath=Livros
+         FilesCount=3
+         File F:\ARTEPLAS\RDMAKE\Converte\Art019.PRW
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART017.PRW
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART018.PRW
+             Type=T
+         End
+      End
+      Folder DIEF
+         VSSPath=DIEF
+         FilesCount=8
+         File F:\ARTEPLAS\RDMAKE\Converte\DIEFTXT.PRX
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\DIEF.PRX
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\DIEFALT.PRX
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\DIEFCFG.PRX
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\DIEFDIG.PRX
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\DIEFIMP.PRX
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\DIEFMNT.PRX
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\DIEFMTA.PRX
+             Type=T
+         End
+      End
+      Folder Inscricao Estadual
+         VSSPath=Inscricao Estadual
+         FilesCount=2
+         File F:\ARTEPLAS\RDMAKE\Converte\Min104A.PRW
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\Min104.prw
+             Type=T
+         End
+      End
+   End
+   Project Contabilidade
+      FoldersCount=4
+      Folder Descontabilizar Estoque
+         VSSPath=Descontabilizar Estoque
+         FilesCount=1
+         File F:\ARTEPLAS\RDMAKE\Converte\FLO024.PRG
+             Type=T
+         End
+      End
+      Folder Descontabiliza Faturamento
+         VSSPath=Descontabiliza Faturamento
+         FilesCount=1
+         File F:\ARTEPLAS\RDMAKE\Converte\Flo023.prg
+             Type=T
+         End
+      End
+      Folder Descontabilizar Financeiro
+         VSSPath=Descontabilizar Financeiro
+         FilesCount=1
+         File F:\ARTEPLAS\RDMAKE\Converte\FLO025.PRG
+             Type=T
+         End
+      End
+      Folder SMS
+         VSSPath=SMS
+         FilesCount=1
+         File F:\ARTEPLAS\RDMAKE\Converte\Reprocessa.PRW
+             Type=T
+         End
+      End
+   End
+   Project Workflow
+      FoldersCount=1
+      Folder Faturamento
+         VSSPath=Faturamento
+         FilesCount=0
+      End
+   End
+   Project Estoque
+      FoldersCount=5
+      Folder Rdmakes
+         VSSPath=Rdmakes
+         FilesCount=8
+         File F:\ARTEPLAS\RDMAKE\Converte\ART101.PRW
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART100.PRW
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\Art109.prw
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\MUDACF.PRW
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\art130.prw
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\VLDPROD.PRW
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\IVLDPRO.PRW
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART141.prw
+             Type=T
+         End
+      End
+      Folder Relatorios
+         VSSPath=Relatorios
+         FilesCount=7
+         File F:\ARTEPLAS\RDMAKE\Converte\art102.prx
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\Sec045.prw
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\Sec040.prw
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\Art114.prw
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART131.PRW
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART132.prw
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\ART133.PRW
+             Type=T
+         End
+      End
+      Folder PontosDeEntrada
+         VSSPath=PontosDeEntrada
+         FilesCount=0
+      End
+      Folder Gatilhos
+         VSSPath=Gatilhos
+         FilesCount=3
+         File F:\ARTEPLAS\RDMAKE\Converte\ART103.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART160.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART162.prw
+             Type=T
+         End
+      End
+      Folder MicroTerminal
+         VSSPath=MicroTerminal
+         FilesCount=2
+         File F:\ARTEPLAS\RDMAKE\Converte\Acd100.prx
+             Type=T
+         End
+         File F:\ARTEPLAS\RDMAKE\Converte\Acd101.prx
+             Type=T
+         End
+      End
+   End
+   Project PCP
+      FoldersCount=3
+      Folder Balança
+         VSSPath=Nova Pasta1
+         FilesCount=1
+         File \Arteplas\rdmake\Converte\ART305.prw
+             Type=T
+         End
+      End
+      Folder Relatorios
+         VSSPath=Nova Pasta2
+         FilesCount=3
+         File \Arteplas\rdmake\Converte\ART164.prx
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART160.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART306.prw
+             Type=T
+         End
+      End
+      Folder Gatilhos
+         VSSPath=Nova Pasta3
+         FilesCount=1
+         File \Arteplas\rdmake\Converte\ART166.prw
+             Type=T
+         End
+      End
+   End
+   BatchBuild_Item0=Faturamento · Configuração AP5 5.08
+   BatchBuild_Item1=Financeiro · Configuração AP5 5.08
+   BatchBuild_Item2=Excel · Configuração AP5 5.08
+End

@@ -1,0 +1,1014 @@
+Group Arteplas
+   Version=7.0
+   VSSDB=
+   HasProperties=1
+   Properties
+      BeforeApply=
+      AfterApply=
+      Icon=
+      ID=
+      Version=
+      PalmName=
+      OutPut=
+   End
+   ProjectsCount=11
+   Project Geral
+      FoldersCount=1
+      Folder Fontes
+         VSSPath=Fontes
+         FilesCount=163
+         File \Arteplas\rdmake\Converte\ACD100.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ACD101.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ACR001.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ACR002.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ACR003.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ACR004.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Ajustpis.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ArrumaCT2.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Art001.prx
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Art002.prx
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART003_AP5.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART004_AP5.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART006_AP5.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART007_AP5.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART008_AP5.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART009_AP5.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART010_AP5.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART011_AP5.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART012_AP5.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART013_AP5.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\art015_AP5.prx
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART016.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART017.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART018.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART020.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART021.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART022.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART023.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART024.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART025.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART026.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART030.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART100.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART101.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\art102.prx
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART103.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART104.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Art105.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\art106.prx
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\art107.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\art108.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART109.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART110.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART111.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART112.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\art113.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Art114.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART115.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART116.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART125.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART126.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART127.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART130.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART131.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART132.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART133.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART141.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART150.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Art153.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART160.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART161.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART162.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART163.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART164.prx
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Art165.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART166.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART167.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART168.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\art169.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Art170.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART171.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Art172.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Art173.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART174.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART175.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Art176.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Art177.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART180.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART181.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART200.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART201.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART202.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART203.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Art204.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ARTCODANT.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ARTDIVC.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Arte02.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\CADSZ7.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\CALCOM.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\CAR155.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\COM110.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\CONVEND.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\CUS99.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\CUSTIPO.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\DIEF.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\DIEFALT.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\DIEFCFG.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\DIEFDIG.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\DIEFIMP.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\DIEFMNT.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\DIEFMTA.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\DIEFTXT.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\EAN14.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\EDUARDO.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\EST001.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\EST002.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\EST300.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\EST999.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\EXP151.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Flo023.prg
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\FLO024.PRG
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Fre024.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\FRE132_AP5.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\FRE132a_AP5.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\GeraIPI.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Getconta_AP5.prx
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\getcred_AP5.prx
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\getdeb_AP5.prx
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\getpar_AP5.prx
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\getslini_AP5.prx
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\GIACTB~1.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\GIAINF~1.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\GIAINI~1.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\GIAPER~1.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\GIASC_~1.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\IBR002.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\INV99.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\INVTIPO.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\IVLDPRO.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\KRO010_AP5.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\MIN044_AP5.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\MIN044A.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\MIN045_AP5.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\MIN046_AP5.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Min104.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Min104A.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\MUDACF.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\PCOMP.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\PCP100.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\PCP200.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\PCP300.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\REAJPV.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\REL300.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\RELPVC.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\RELSD1.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Reprocessa.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Rio033_AP5.prx
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\rio034_AP5.prx
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\roger.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\S1261004.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Sec040.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Sec041.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Sec045.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\SMS001.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\SMS002.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\smsALDOS.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\SMSARM.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\SMSCUS.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\SMSINV.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\TITREC.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Art154a.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART005.PRX
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Art014_AP5.prx
+             Type=T
+         End
+      End
+   End
+   Project Teste
+      FoldersCount=1
+      Folder Temporarios
+         VSSPath=Nova Pasta1
+         FilesCount=20
+         File \Arteplas\rdmake\Converte\fatr03.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\ART0205.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART902.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART903.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART904.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART905.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART908.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART907.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART909.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART910.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART911.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART912.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART913.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART914.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART901.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\EXCREZENDE.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART915.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART916.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART917.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART918.PRW
+             Type=T
+         End
+      End
+   End
+   Project Pontos de Entrada
+      FoldersCount=5
+      Folder PCP
+         VSSPath=Nova Pasta1
+         FilesCount=3
+         File \Arteplas\rdmake\Converte\A650OKSC.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\MT250TOK.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\MT710B1.prw
+             Type=T
+         End
+      End
+      Folder Compras
+         VSSPath=Nova Pasta2
+         FilesCount=1
+         File \Arteplas\rdmake\Converte\M020Inc.prw
+             Type=T
+         End
+      End
+      Folder Faturamento
+         VSSPath=Nova Pasta3
+         FilesCount=5
+         File \Arteplas\rdmake\Converte\M030Inc.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\MT440GR.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\MTA410.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\MSD2460.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\M440STTS.prw
+             Type=T
+         End
+      End
+      Folder Estoque
+         VSSPath=Nova Pasta4
+         FilesCount=1
+         File \Arteplas\rdmake\Converte\MT010INC.prw
+             Type=T
+         End
+      End
+      Folder Financeiro
+         VSSPath=Nova Pasta5
+         FilesCount=1
+         File \Arteplas\rdmake\Converte\FIN420_1.PRX
+             Type=T
+         End
+      End
+   End
+   Project Faturamento
+      FoldersCount=4
+      Folder Relatórios
+         VSSPath=Nova Pasta1
+         FilesCount=26
+         File \Arteplas\rdmake\Converte\art300.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\art302.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART327.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART328.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART330.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART151.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART152.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART331.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART336.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART346.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART343.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART348.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART359.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART368.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART374.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART375.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART377.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART378.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART380.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART381.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART382.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART383.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\danfeii.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\nfesefaz.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART389.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART390.prw
+             Type=T
+         End
+      End
+      Folder Rotinas
+         VSSPath=Nova Pasta3
+         FilesCount=7
+         File \Arteplas\rdmake\Converte\ART319.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART329.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART334.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART340.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART353.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART358.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART376.prw
+             Type=T
+         End
+      End
+      Folder Atualizações
+         VSSPath=Nova Pasta3
+         FilesCount=7
+         File \Arteplas\rdmake\Converte\ART337.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART339.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART341.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART351.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART352.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART361.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART364.PRW
+             Type=T
+         End
+      End
+      Folder Gatilhos
+         VSSPath=Nova Pasta4
+         FilesCount=2
+         File \Arteplas\rdmake\Converte\ART355.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART356.prw
+             Type=T
+         End
+      End
+   End
+   Project Livros Fiscais
+      FoldersCount=2
+      Folder Relatórios
+         VSSPath=Nova Pasta1
+         FilesCount=2
+         File \Arteplas\rdmake\Converte\ART307.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART342.prw
+             Type=T
+         End
+      End
+      Folder Atualizações
+         VSSPath=Nova Pasta2
+         FilesCount=1
+         File \Arteplas\rdmake\Converte\ART384.prw
+             Type=T
+         End
+      End
+   End
+   Project Compras
+      FoldersCount=3
+      Folder Relatórios
+         VSSPath=Nova Pasta1
+         FilesCount=2
+         File \Arteplas\rdmake\Converte\ART308.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\art324.PRW
+             Type=T
+         End
+      End
+      Folder Gatilhos
+         VSSPath=Nova Pasta2
+         FilesCount=1
+         File \Arteplas\rdmake\Converte\ART373.prw
+             Type=T
+         End
+      End
+      Folder Atualizações
+         VSSPath=Nova Pasta3
+         FilesCount=1
+         File \Arteplas\rdmake\Converte\ART386.prw
+             Type=T
+         End
+      End
+   End
+   Project Estoque
+      FoldersCount=4
+      Folder Relatórios
+         VSSPath=Nova Pasta1
+         FilesCount=17
+         File \Arteplas\rdmake\Converte\Art309.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Art313.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART317.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\art318.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\art320.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART325.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\art332.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\art333.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART344.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Art349.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART360.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Art362.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Art363.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART365.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART367.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Art372.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\Art392.prw
+             Type=T
+         End
+      End
+      Folder Rotinas
+         VSSPath=Nova Pasta2
+         FilesCount=1
+         File \Arteplas\rdmake\Converte\ART314.prw
+             Type=T
+         End
+      End
+      Folder Gatilhos
+         VSSPath=Nova Pasta3
+         FilesCount=0
+      End
+      Folder Etiquetas
+         VSSPath=Nova Pasta4
+         FilesCount=1
+         File \Arteplas\rdmake\Estoque\Etiquetas\Art394.PRW
+             Type=T
+         End
+      End
+   End
+   Project Workflow
+      FoldersCount=2
+      Folder Faturamento
+         VSSPath=Nova Pasta1
+         FilesCount=4
+         File \Arteplas\rdmake\Converte\ART310.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART321.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART323.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART366.prw
+             Type=T
+         End
+      End
+      Folder PCP
+         VSSPath=Nova Pasta2
+         FilesCount=1
+         File \Arteplas\rdmake\Converte\art311.PRW
+             Type=T
+         End
+      End
+   End
+   Project PCP
+      FoldersCount=2
+      Folder Relatorios
+         VSSPath=Nova Pasta1
+         FilesCount=10
+         File \Arteplas\rdmake\Converte\ART338.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART326.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART345.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART347.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART350.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART369.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART370.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART385.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART388.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART391.prw
+             Type=T
+         End
+      End
+      Folder Rotinas
+         VSSPath=Nova Pasta2
+         FilesCount=1
+         File \Arteplas\rdmake\Converte\ART305.prw
+             Type=T
+         End
+      End
+   End
+   Project Ativo Fixo
+      FoldersCount=1
+      Folder Relatórios
+         VSSPath=Nova Pasta1
+         FilesCount=1
+         File \Arteplas\rdmake\Converte\ART357.prw
+             Type=T
+         End
+      End
+   End
+   Project Financeiro
+      FoldersCount=2
+      Folder Rotinas
+         VSSPath=Nova Pasta1
+         FilesCount=3
+         File \Arteplas\rdmake\Converte\FLO025_AP5.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART906.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\CNAB2.PRX
+             Type=T
+         End
+      End
+      Folder Relatórios
+         VSSPath=Nova Pasta2
+         FilesCount=3
+         File \Arteplas\rdmake\Converte\ART371.PRW
+             Type=T
+         End
+         File \Arteplas\rdmake\Converte\ART387.prw
+             Type=T
+         End
+         File \Arteplas\rdmake\Financeiro\Relatorios\art029.prw
+             Type=T
+         End
+      End
+   End
+   BatchBuild_Item0=Faturamento · Configuração AP5 5.08
+   BatchBuild_Item1=Financeiro · Configuração AP5 5.08
+   BatchBuild_Item2=Excel · Configuração AP5 5.08
+End
