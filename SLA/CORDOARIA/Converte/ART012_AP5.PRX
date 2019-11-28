@@ -1,0 +1,419 @@
+#include "rwmake.ch"
+
+User Function ART012
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Declaracao de variaveis utilizadas no programa atraves da funcao    ³
+//³ SetPrvt, que criara somente as variaveis definidas pelo usuario,    ³
+//³ identificando as variaveis publicas do sistema utilizadas no codigo ³
+//³ Incluido pelo assistente de conversao do AP5 IDE                    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+SetPrvt("TAMANHO,LIMITE,TITULO,CDESC1,CDESC2,CDESC3")
+SetPrvt("CSTRING,ARETURN,NLASTKEY,NPRI,NOMEPROG,CPERG")
+SetPrvt("WNREL,NQTDPED,NQTDLIB,")
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Descricao ³ CONTROLE DE EXPEDICAO                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Especifico para ARTEPLAS uso com Rdmake                    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Arquivos  ³  SA1 - SF2 - SA4 - SF4 - SB1                               ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+
+cPict       := ""
+titulo		:= "Controle de Expedição"
+nLin        := 80
+Cabec1      := ""
+Cabec2      := ""
+imprime     := .T.
+aOrd 		:= {}
+lEnd        := .F.
+lAbortPrint := .F.
+CbTxt       := ""
+limite      := 80
+tamanho     := "P"
+nomeprog    := "ART012"
+nTipo       := 18
+aReturn     := { "Zebrado", 1, "Administracao", 2, 2, 1, "", 1}
+nLastKey    := 0
+cbtxt      	:= Space(10)
+cbcont     	:= 00
+CONTFL     	:= 01
+m_pag      	:= 01
+wnrel      	:= "ART012"
+
+
+nLastKey 	:= 0
+nPRI     	:= 0
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Salva a Integridade dos dados de Saida                       ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+cPerg    := "MTR730"
+
+If !Pergunte(cPerg,.T.)
+	Return
+EndIf
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                         ³
+//³ mv_par01             // Do Pedido                            ³
+//³ mv_par02             // Ate Pedido                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Envia controle para a funcao SETPRINT                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+wnrel:=SetPrint(cString,wnrel,cPerg,Titulo,cDesc1,cDesc2,cDesc3,.F.,"")
+
+If LastKey() == 27 .or. nLastKey == 27
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If LastKey() == 27 .or. nLastKey == 27
+	Return
+Endif
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Salva posicoes para movimento da regua de processamento      ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+nQtdPed 	:= 0.00
+nQtdLib 	:= 0.00          
+nConv   	:= 0.00
+nProdPesBru := 0.00
+nPesBru 	:= 0.00
+nValor  	:= 0.00
+cDuplic 	:= " "
+cCodCondpag	:= " "
+cCondpag	:= " "
+
+RptStatus({|| RptDetail()})
+Return
+
+Static Function RptDetail()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Posiciona o SF2 para achar a primeira NF                      ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+SETPRC(0,0)
+
+dbSelectArea("SC5")
+dbSetOrder(1)
+dbGoTop()
+dbSeek(xFilial("SC5")+MV_PAR01,.F.)
+
+While !EOF() .and. SC5->C5_FILIAL == xFilial("SC5") .and. SC5->C5_NUM <= MV_PAR02
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Confirma Teste de Impressao na Nota Fiscal                   ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	
+	nLin := 2
+	@ nLin,000 PSAY "|"+Replicate("-",079)+"|"
+	nLin++                                                  
+	@ nLin,000 PSAY "|Cordoaria Brasil"
+	@ nLin,050 PSAY "Data Emissao : "+DtoC(SC5->C5_EMISSAO)
+	@ nLin,080 PSAY "|"
+	nLin++
+	@ nLin,000 PSAY "|"+Replicate("-",079)+"|"
+	nLin++
+	@ nLin,000 PSAY "|CONTROLE DE EXPEDICAO "
+	@ nLin,050 PSAY "Data da Saida: ___/ ___/ ___"
+	@ nLin,080 PSAY "|"
+	nLin++
+	@ nLin,000 PSAY "|"+Replicate("-",079)+"|"
+	dbSelectArea("SA3")
+	DBSETORDER(1)
+	DBGOTOP()
+	DBSEEK(xFILIAL("SA3")+SC5->C5_VEND1,.T.)
+	nLin++
+	@ nLin,000 PSAY "|N/Pedido : "+SC5->C5_NUM+" Ped.Cliente: "+SC5->C5_PEDCLI+" - "+"Repres.: "+SC5->C5_VEND1 //+"Gerente: "+SA3->A3_GERENTE
+	@ nLin,080 PSAY "|"
+	nLin++
+	@ nLin,000 PSAY "|"+Repli("-",079)+"|"
+	
+	dbSelectArea("SA1")
+	dbSetOrder(1)
+	dbGoTop()
+	dbSeek(xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI,.T.)
+	
+	nLin++
+	@ nLin,000 PSAY "|Cliente : "+SC5->C5_CLIENTE+" - "+SA1->A1_NOME
+	@ nLin,080 PSAY "|"
+//	nLin++
+//	@ nLin,000 PSAY "|Endereco: "+SA1->A1_END
+//	@ nLin,080 PSAY "|"
+	nLin++
+	@ nLin,000 PSAY "|Cidade  : "+Alltrim(SA1->A1_MUN)+" - "+SA1->A1_EST
+	@ nLin,080 PSAY "|"
+	nLin++
+
+	
+	
+	dbSelectArea("SA4")
+	dbSetOrder(1)//      TRANSPORTADORA
+	dbGoTop()
+	If dbSeek(xFilial("SA4")+SC5->C5_TRANSP,.T.)
+		@ nLin,000 PSAY "|"+Repli("-",079)+"|"
+		nLin++
+		@ nLin,000 PSAY '|Transp.: ' + Alltrim(SC5->C5_TRANSP) + ' - ' + Alltrim(SA4->A4_NOME)
+		@ nLin,080 PSAY "|"
+		nLin++
+		@ nLin,000 PSAY '|Tel.: '	 + Alltrim(SA4->A4_TEL)
+		@ nLin,050 PSAY 'Placa : '	 + Alltrim(SC5->C5_PLACA)
+		@ nLin,080 PSAY "|"
+	Else
+		@ nLin,000 PSAY ""
+	Endif
+	nLin++
+
+	@ nLin,000 PSAY "|"+Repli("-",079)+"|"
+	nLin++
+	@ nLin,000 PSAY "|Cod.     |  Quant.|UM|  Lib.|Descricao do Produto               |P. Saída| Vol.|"
+	*                |9999     |9,999.99|XX|999.99|XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX|99/99/99|99999
+	nLin++
+	@ nLin,000 PSAY "|---------|--------|--|------|-----------------------------------|--------|-----|"
+			     	*012345678901234567890123456789012345678901234567890123456789012345678901234567890
+					*         10        20        30        40        50        60        70        80
+	
+	nQtdPed 	:= 0
+	nQtdLib 	:= 0
+	nConv   	:= 0
+	nProdPesBru := 0
+	nPesBru 	:= 0
+	NvALOR  	:= 0
+	
+	If SC5->C5_BLQ <> 'S' // Bloqueado Preco Medio
+		
+		dbSelectArea("SC6")
+		SC6->(DbSetOrder(1))
+		SC6->(DbSeek(xFilial("SC6")+SC5->C5_NUM,.F.))
+		nItem := 0
+		While !SC6->(Eof()) .and. xFilial("SC6") == SC6->C6_FILIAL .and. SC6->C6_NUM == SC5->C5_NUM
+			If (SC6->C6_QTDVEN - SC6->C6_QTDENT - SC6->C6_QTDEMP) <> 0 .and. SC6->C6_BLQ<>'R'
+				nLin++
+				@ nLin,000  PSAY "|"
+				dbSelectArea("SB1")
+				SB1->(DbSetOrder(1))
+				SB1->(DbSeek(xFilial("SB1")+SC6->C6_PRODUTO,.F.))
+				If SC5->C5_TIPC = "S"
+					@ nLin,001  PSAY Subs(SB1->B1_TIPC,1,9)
+				Else
+					@ nLin,001  PSAY Subs(SC6->C6_PRODUTO,1,9)
+				EndIf
+				nItem := nItem + 1
+				@ nLin,010  PSAY "|"
+				@ nLin,013  PSAY (SC6->C6_QTDVEN - SC6->C6_QTDENT - SC6->C6_QTDEMP)  Picture"@E 9,999"      // QTDE VENDIDA        
+				@ nLin,019  PSAY "|"
+				@ nLin,020  PSAY SC6->C6_UM
+				@ nLin,022  PSAY "|"
+//				@ nLin,021  PSAY 0  Picture "@E 999,99" // QTDE LIBERADA
+				@ nLin,029  PSAY "|"
+				If SB1->B1_GRUPO >= "0151" .and. SB1->B1_GRUPO <= "0158" //MEADAS EXPORTAÇÃO
+					@ nLin,030  PSAY Subs(SB1->B1_DESC,1,34)
+				Else
+					If SC5->C5_TIPC = "S"
+						@ nLin,03  PSAY Subs(SC6->C6_DESCRI,1,34) + "TP C"
+					Else
+						@ nLin,030  PSAY Subs(SC6->C6_DESCRI,1,34)
+					EndIf
+				Endif
+				@ nLin,065  PSAY "|" + DtoC(SC6->C6_ENTREG)
+				@ nLin,074  PSAY "|"
+				@ nLin,080  PSAY "|"
+				nLin++
+				@ nLin,000 PSAY "|---------|--------|--|------|-----------------------------------|--------|-----|"
+			     				*012345678901234567890123456789012345678901234567890123456789012345678901234567890
+								*         10        20        30        40        50        60        70        80
+				
+				If nItem >= 23
+					nLin++
+					@ nLin,000 PSAY "|===============================================================================|"
+					nLin++
+					@ nLin,000 PSAY "|CONTINUA..."
+					@ nLin,080 PSAY "|"
+					nLin++
+					@ nLin,000 PSAY "|-------------------------------------------------------------------------------|"
+					
+					nLin := 2
+					@ nLin,000 PSAY "|"+Replicate("-",079)+"|"
+					nLin++
+					@ nLin,000 PSAY "|Cordoaria Brasil."
+					@ nLin,050 PSAY "Data Emissao : "+DtoC(SC5->C5_EMISSAO)
+					@ nLin,080 PSAY "|"
+					nLin++
+					@ nLin,000 PSAY "|"+Replicate("-",079)+"|"
+					nLin++
+					@ nLin,000 PSAY "|CONTROLE DE EXPEDICAO "
+					@ nLin,050 PSAY "Data da Saida: ___/ ___/ ___"
+					@ nLin,080 PSAY "|"
+					nLin++
+					@ nLin,000 PSAY "|"+Replicate("-",079)+"|"
+					dbSelectArea("SA3")
+					DBSETORDER(1)
+					DBGOTOP()
+					DBSEEK(xFILIAL("SA3") + SC5->C5_VEND1,.T.)
+					nLin++
+					@ nLin,000 PSAY "|N/Pedido : "+SC5->C5_NUM+" Ped.Cliente: "+SC5->C5_PEDCLI+" - "+"Repres.: "+SC5->C5_VEND1// +"Gerente: "+SA3->A3_GERENTE
+					@ nLin,080 PSAY "|"
+					nLin++
+					@ nLin,000 PSAY "|"+Repli("-",079)+"|"
+					
+					dbSelectArea("SA1")
+					dbSetOrder(1)
+					dbGoTop()
+					dbSeek(xFilial("SA1") + SC5->C5_CLIENTE+SC5->C5_LOJACLI,.T.)      
+					
+					nLin++
+					@ nLin,000 PSAY "|Cliente : " + SC5->C5_CLIENTE + " - " + SA1->A1_NOME
+					@ nLin,080 PSAY "|"
+					nLin++
+					@ nLin,000 PSAY "|Endereco: "+SA1->A1_END
+					@ nLin,080 PSAY "|"
+					nLin++
+					@ nLin,000 PSAY "|Cidade  : "+SA1->A1_MUN+" - "+SA1->A1_EST
+					@ nLin,080 PSAY "|"
+					nLin++                                             
+					@ nLin,000 PSAY "|"+Repli("-",079)+"|"
+					nLin++
+					@ nLin,000 PSAY "|Cod.     |  Pedido|UM|  Lib.|Descricao do Produto               |P. Saída| Vol.|"
+					*                |9999     |9,999.99|XX|999.99|XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX|99/99/99|99999
+					nLin++
+					@ nLin,000 PSAY "|---------|--------|--|------|-----------------------------------|--------|-----|"
+			     					*012345678901234567890123456789012345678901234567890123456789012345678901234567890
+									*         10        20        30        40        50        60        70        80
+					
+					nItem := 0
+				Endif  
+
+				If SC6->C6_UM <> 'KG' 
+					nConv   := Posicione("SB1",1,xFilial("SB1")+SC6->C6_PRODUTO,"B1_CONV")
+					nProdPesBru := Posicione("SB1",1,xFilial("SB1")+SC6->C6_PRODUTO,"B1_PESBRU")  
+					nQtdPed += (SC6->C6_QTDVEN - SC6->C6_QTDENT- SC6->C6_QTDEMP) * nConv
+					nPesBru += (SC6->C6_QTDVEN - SC6->C6_QTDENT- SC6->C6_QTDEMP) * nProdPesBru
+				Else
+					nQtdPed := nQtdPed + SC6->C6_QTDVEN -SC6->C6_QTDENT - SC6->C6_QTDEMP        
+					nPesBru := nPesBru + SC6->C6_QTDVEN - SC6->C6_QTDENT- SC6->C6_QTDEMP
+					nQtdLib := nQtdLib + 0
+				Endif                                                                     
+				
+
+				cDuplic := Posicione("SF4",1,xFilial("SF4")+SC6->C6_TES,"F4_DUPLIC")
+//                If cDuplic = 'S' -- Retirado, pois Pedidos RP nao geram Duplicata
+					nValor :=nValor + (SC6->C6_QTDVEN - SC6->C6_QTDENT - SC6->C6_QTDEMP) * SC6->C6_PRUNIT
+//				EndIf                                                           
+			   
+						
+			Endif
+			dbSelectArea("SC6")
+			SC6->(DbSkip())
+		End
+	EndIf
+	nLin++
+	@ nLin,000 PSAY "|===============================================================================|"
+	nLin++
+	@ nLin,000 PSAY "| Peso Liq.:"
+	@ nLin,012 PSAY nQtdPed  Picture"@E@Z 999,999.99"
+	@ nLin,023 PSAY "| Peso Bru.:"
+	@ nLin,034 PSAY nPesBru  Picture"@E@Z 999,999.99"
+	@ nLin,047 PSAY "| R$: "
+	@ nLin,052 PSAY nValor Picture"@E@Z 99,999,999.99"
+	@ nLin,080 PSAY "|"
+	nLin++
+	@ nLin,000 PSAY "|-------------------------------------------------------------------------------|"
+	nLin++
+	@ nLin,000 PSAY "|                                                                               |"
+	nLin++
+	@ nLin,000  PSAY "| Total de Volumes:              "+"     Especie: "+SC5->C5_ESPECI1
+	@ nLin,080  PSAY "|"
+	nLin++
+	@ nLin,000  PSAY "|"+Repli("-",079)+"|"
+	
+	nLin++
+	@ nLin,000  PSAY "| Observacoes: "
+	@ nLin,080  PSAY "|"
+	nLin++
+	@ nLin,000  PSAY "|"+Subs(SC5->C5_OBS,1,75)
+	@ nLin,080  PSAY "|"
+	nLin++
+	@ nLin,000  PSAY "|"+Subs(SC5->C5_OBS,76,75)
+	@ nLin,080  PSAY "|"
+	nLin++
+	@ nLin,000  PSAY "|"+Subs(SC5->C5_OBS,151,75)
+	@ nLin,080  PSAY "|"
+	nLin++
+	@ nLin,000  PSAY "|"+Subs(SC5->C5_OBS,226,75)
+	@ nLin,080  PSAY "|"
+	nLin++
+	@ nLin,000  PSAY "|"+Subs(SC5->C5_OBS,301,75)
+	@ nLin,080  PSAY "|"
+	nLin++
+	@ nLin,000  PSAY "|"+Subs(SC5->C5_OBS,376,75)
+	@ nLin,080  PSAY "|"                         
+	nLin++
+	@ nLin,000  PSAY "|"+Subs(SC5->C5_OBS,451,75)
+	@ nLin,080  PSAY "|"
+	nLin++
+	@ nLin,000 PSAY "|-------------------------------------------------------------------------------|"
+    nLin++   
+
+	If SC5->C5_TIPOENT == "T"
+		@ nLin,000  PSAY "| Tipo de Entrega:                    T O T A L"	
+	ElseIf SC5->C5_TIPOENT == "F"
+		@ nLin,000  PSAY "| Tipo de Entrega:                   P A R C I A L"         
+	ElseIf SC5->C5_TIPOENT == " "                                               
+		@ nLin,000  PSAY "| Tipo de Entrega:                    NAO DEFINIDO"         
+	EndIf
+
+
+	@ nLin,080  PSAY "|"
+	nLin++
+	@ nLin,000 PSAY "|===============================================================================|"
+	
+	// Condição de Pagamento adicionado por Eduardo Marquetti em 24/10/2013
+	cCodCondpag := Alltrim(Posicione("SE4",1,xFilial("SE4")+SC5->C5_CONDPAG,"E4_CODIGO"))
+	cCondPag := " - " + Alltrim(Posicione("SE4",1,xFilial("SE4")+SC5->C5_CONDPAG,"E4_DESCRI"))
+
+	nLin++
+	@ nLin,000 PSAY "|Condicao Pagto:"
+	@ nLin,017 PSAY cCodCondPag
+	@ nLin,021 PSAY cCondPag
+	@ nLin,080 PSAY "|"
+
+	nLin++
+	@ nLin,000 PSAY "|===============================================================================|"
+	nLin++
+	@ nLin,000 PSAY "|Observacoes Expedicao:                                                         |"
+	
+	dbSelectArea("SC5")
+	dbSkip()
+End
+
+If aReturn[5] == 1
+	dbcommitAll()
+	ourspool(wnrel)
+Endif
+
+MS_FLUSH()
+
+Return

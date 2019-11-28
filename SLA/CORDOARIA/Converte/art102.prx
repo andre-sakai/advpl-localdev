@@ -1,0 +1,245 @@
+#include "rwmake.ch"
+
+/*
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³rdmake	 ³ EtiqZ001 ³ Autor ³ Fernando Alves        ³ Data ³ 05.04.99 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Rotina de impressao de etiquetas codigo de Barras   	     ³±±
+±±³          ³ do cadastro de produtos                         			  ³±±
+±±³          ³                                                 			  ³±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+
+Static Function _Eti()
+
+SB5->(DBSetOrder(1))
+SB5->(DBGoTop())
+
+cIndexSB1 := CriaTrab(nil,.f.)
+DbSelectArea("SB1")
+dIndexSB1 :="B1_COD"
+cCondicao :=""
+cCondicao := cCondicao + 'B1_COD >= "'+ mv_par01 +'" .AND. '
+cCondicao := cCondicao + 'B1_COD <= "'+ mv_par02 +'"'
+cMsgProd  := ' '
+cMsgEmb   := ' '
+
+if mv_par04 == 01
+	_cPorta := "COM1:9600,N,8,1"
+else
+	_cPorta := "COM2:9600,N,8,1"
+endif
+
+IndRegua("SB1",cIndexSB1,dIndexSB1,,cCondicao,"Selecionando Produtos..." )
+
+SB1->(DBGoTop())
+
+//Caso a etiqueta seja embalagem, o código de barras será do tipo DUN-14
+
+If mv_par06 == 1
+	_cModelo := "F"
+Else
+	_cModelo := "D"
+EndIf
+
+nQtdEmb := 0
+
+//Alterado por Clóvis - 22/01/08
+//Tratar medida da altura das etiquetas automaticamente
+
+MSCBPRINTER("ALLEGRO",_cPorta,,)
+
+ProcRegua(SB1->(RecCount()))
+
+While ! SB1->(eof())
+	
+	If ALLTRIM(SB1->B1_COD) >= "011240001" .and. ALLTRIM(SB1->B1_COD) <= "011280110"   //ETIQUETAS CORDAS EXPORTAÇÃO
+		
+		If SB1->B1_TIPOFIO == "MULTI"
+			cTipoFio := "MULTIFILAMENT"
+		Else
+			cTipoFio := "MONOFILAMENT"
+		Endif
+		
+		If SB1->B1_TIPOCOR == "TOR"
+			cTipoCor := "TWISTED"
+		Else
+			If SB1->B1_TIPOCOR == "TRA"
+				cTipoCor := "BRAID"
+			Else
+				cTipoCor := "TWISTED/RETWISTED"
+			Endif
+		Endif
+		
+	Endif
+	
+	IncProc("Imprimindo Etiquetas...")
+	
+	If mv_par06 <> 4
+		
+		//INCLUÍDO POR CLÓVIS (16/07/08) PARA TRATAR IMPRESSÃO DE CORDAS VONDER
+		If (ALLTRIM(SB1->B1_COD) >= "011512275" .and. ALLTRIM(SB1->B1_COD) <= "011512488") .OR. (ALLTRIM(SB1->B1_COD) >= "011812104" .and. ALLTRIM(SB1->B1_COD) <= "011812236")
+				
+			SB5->(DBSeek(xFilial("SB5")+SB1->B1_COD,.F.))
+			_cCodBarra  := AllTrim(SB1->B1_CODBAR)
+			_cDescricao := Alltrim(SB5->B5_CEME)
+			_cEmbalagem := Alltrim(SB5->B5_CODCLI) + " - " + "Embalagem "
+			
+			If mv_par08 > 0
+				_cEmbalagem += AllTrim(Str(mv_par08)) + " " + SB1->B1_UM
+			EndIf
+			
+		Else
+			
+			If mv_par06 == 1 //ETIQUETAS PARA PRODUTOS
+				
+				_cCodBarra  := AllTrim(SB1->B1_CODBAR)
+				
+				If MV_PAR07 == 1 //TIPO C
+					_cDescricao := Alltrim(SB1->B1_DESC) + "TP C"
+					_cEmbalagem := SB1->B1_TIPC
+				Else
+					If ALLTRIM(SB1->B1_COD) >= "011240001" .and. ALLTRIM(SB1->B1_COD) <= "011280110" // Cordas para exportação
+						_cDescricao := Posicione("SA7",2,xFilial("SA7")+SB1->B1_COD,"A7_DESCCLI")
+						_cEmbalagem := Posicione("SA7",2,xFilial("SA7")+SB1->B1_COD,"A7_CODCLI")
+					Else
+						_cDescricao := Alltrim(SB1->B1_DESC)
+						_cEmbalagem := Alltrim(SB1->B1_COD)
+						
+//						If Posicione("SA7",2,xFilial("SA7")+SB1->B1_COD,"A7_CLIENTE") = '2065' .AND. SB1->B1_CONTETQ = 'S' // ETIQUETA VERDE - ESPECÍFICO TAMBASA (EDUARDO MARQUETTI - 15/01/13)
+//							cMsgProd := "EXPORT PRODUCT" //EXCLUSIVO ETIQUETAS VERDES TAMBASA
+//						EndIf
+						
+					Endif
+				EndIf
+				
+				If mv_par08 > 0
+					_cEmbalagem += " " + AllTrim(Str(mv_par08)) + " " + SB1->B1_UM
+				EndIf
+				
+			Else
+				
+				SB5->(DBSeek(xFilial("SB5")+SB1->B1_COD,.F.))
+				_cCodBarra := AllTrim(SB5->B5_EMB1)
+				
+				If mv_par06 == 2 //ETIQUETAS PARA EMBALAGENS
+					nQtdEmb := Str(SB5->B5_QE1)
+				Else	         //ETIQUETAS EMBALAGENS MASTER
+					nQtdEmb := Str(SB5->B5_QE2)
+				Endif
+				
+				If MV_PAR07 == 1
+					_cDescricao := Alltrim(SB1->B1_DESC) + " - TP C"
+					_cEmbalagem := Alltrim(SB1->B1_TIPC) + " - Embalagem "
+				Else
+					_cDescricao := Alltrim(SB1->B1_DESC)
+					
+					/* ROTINA PARA CATRACAS MARTINS
+					If Val(nQtdEmb) > 0
+					_cEmbalagem := Alltrim(SB1->B1_COD) + " - " + "Embalagem " + " - " + Alltrim(nQtdEmb) + " PC"
+					Else
+					_cEmbalagem := Alltrim(SB1->B1_COD) + " - " + "Embalagem "
+					Endif
+					EndIf
+					
+					*/
+					
+					_cEmbalagem := Alltrim(SB1->B1_COD) + " - " + "Embalagem "    
+					                                       
+				Endif
+				
+				//Incluído o parâmetro mv_par08, onde será informado o peso da embalagem.
+				//Alterado por Clóvis em 08/03/07 para levar em consideração apenas o peso informado nos parâmetros
+				
+				If mv_par08 > 0
+					_cEmbalagem += AllTrim(Str(mv_par08)) + " " + SB1->B1_UM
+				EndIf
+				
+			Endif
+			
+		Endif
+		
+		If !Empty(_cCodBarra)
+			MSCBBEGIN(val(mv_par03),4)
+		
+			If ALLTRIM(SB1->B1_COD) >= "011240001" .and. ALLTRIM(SB1->B1_COD) <= "011280110"   //ETIQUETAS CORDAS EXPORTAÇÃO
+				MSCBSAYBAR(35,04,_cCodBarra,"N",_cModelo,10,.f.,.t.,,,7,4,.f.)
+				c := Alltrim(Str(SB1->B1_RESISTE))
+				MSCBSAY(40,22,"Working Load: " + Alltrim(Str(SB1->B1_RESISTE)) + " lbs","N","2","001,001")
+				MSCBSAY(33,29,Alltrim(_cDescricao),"N","2","001,001")
+				MSCBSAY(40,34,cTipoCor + " " + cTipoFio,"N","2","001,001")
+				MSCBSAY(40,42,Alltrim(_cEmbalagem),"N","3","001,001")
+			Else
+		
+			If mv_par06 == 1     // Etiqueta Produto
+				MSCBSAYBAR(13,01,_cCodBarra,"N",_cModelo,10,.f.,.t.,,,7,4,.f.)
+			Else  				
+				MSCBSAY(30,02,_cCodBarra,"N","2","001,001")
+				MSCBSAYBAR(11,04,_cCodBarra,"N",_cModelo,10,.f.,.f.,,,8,5,.f.)   
+				
+//				If Posicione("SA7",2,xFilial("SA7")+SB1->B1_COD,"A7_CLIENTE") = '2065' .AND. SB1->B1_CONTETQ = 'S' // ETIQUETA VERDE - ESPECÍFICO TAMBASA (EDUARDO MARQUETTI - 15/01/13)
+//					cMsgEmb  := "EXPORT PRODUCT" //EXCLUSIVO ETIQUETAS VERDES TAMBASA
+// 				EndIf	
+				
+				MSCBSAY((80-(Len(cMsgEmb)*2))/2,16,cMsgEmb,"N","2","001,001")	
+			EndIf
+
+//			MSCBSAY(15,20,_cEmbalagem,"N","3","001,001") // Embalagem ou Código do Produto
+			MSCBSAY((80-(Len(_cEmbalagem)*2))/2,20,_cEmbalagem,"N","3","001,001") // Embalagem ou Código do Produto
+// 			MSCBSAY((80-(Len(_cEmbalagem)*2))/2,21,_cEmbalagem,"N","3","001,001") // Embalagem ou Código do Produto
+			MSCBSAY(29,16,cMsgProd,"N","2","001,001")
+
+			If Substr(_cDescricao,1,5) == "MEADA"
+				MSCBSAY(01,25,_cDescricao,"N","2","002,001")
+			Else
+				MSCBSAY((80-(Len(_cDescricao)*2))/2,25,_cDescricao,"N","3","001,001")  //Coluna x Linha
+
+				MSCBSAY(24,17,"Validade Indeterminada","N","2","001,001")  //Coluna x Linha
+//				MSCBSAY((80-(Len(_cDescricao)*2))/2,17,_cDescricao,"N","3","001,001")  //Coluna x Linha
+			Endif
+	
+		Endif                                                                                      
+			
+			
+	MSCBEND()
+		
+	EndIf
+		
+	Else
+		
+		MSCBBEGIN(val(mv_par03),4)
+		MSCBSAY(12,06,"CGC: 82.931.346/0001-78","N","3","001,001")  //Coluna x Linha
+		MSCBSAY(12,12,"CEP: 88308-000 - Itajai/SC","N","3","001,001")  //Coluna x Linha
+		MSCBSAY(05,18,"Av. Adolfo Konder, 1444 - Sao Vicente","N","3","001,001")  //Coluna x Linha
+		MSCBSAY(08,24,"Arteplas Artefatos de Plasticos S/A","N","3","001,001")
+		
+		MSCBEND()
+		
+	Endif
+	
+	SB1->(DbSkip())
+	
+End
+
+
+
+dbSelectArea("SB1")
+RetIndex("SB1")
+Ferase(cIndexSB1+OrdBagExt())
+Return
+
+User Function ART102()
+cPerg := "ETIZ01"  // Nome da Pergunte
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas selecionadas                                      ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+IF !Pergunte(cPerg,.T.)               // Pergunta no SX1
+	Return
+Endif
+Processa({|| _Eti() })
+Return

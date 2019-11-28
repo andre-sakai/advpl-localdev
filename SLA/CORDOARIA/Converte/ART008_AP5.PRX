@@ -1,0 +1,8 @@
+#include "rwmake.ch"        // incluido pelo assistente de conversao do AP5 IDE em 06/03/01
+
+User Function ART008()        // incluido pelo assistente de conversao do AP5 IDE em 06/03/01
+
+axcadastro("SZ1","Cadastro de CEP's",".T.",".T.")
+
+Return(nil)        // incluido pelo assistente de conversao do AP5 IDE em 06/03/01
+

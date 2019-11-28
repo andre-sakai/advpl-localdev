@@ -1,0 +1,968 @@
+#INCLUDE "rwmake.ch"
+#include "topconn.ch"
+
+User Function ART001()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Declaracao de variaveis utilizadas no programa atraves da funcao    ³
+//³ SetPrvt, que criara somente as variaveis definidas pelo usuario,    ³
+//³ identificando as variaveis publicas do sistema utilizadas no codigo ³
+//³ Incluido pelo assistente de conversao do AP5 IDE                    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+/*
+SetPrvt("CBTXT,CBCONT,NORDEM,TAMANHO,LIMITE,TITULO")
+SetPrvt("CDESC1,CDESC2,CDESC3,CSTRING,ARETURN,NOMEPROG")
+SetPrvt("NLASTKEY,CPERG,WNREL,M_PAG,LCONTINUA,NVLTOTIPI")
+SetPrvt("CPRIVEZ,NBASEITEM,NTICMITEM,NPERICM,NVLICMFRE,NMERCTOT")
+SetPrvt("NTOTGERAL,CEST,CALIQN,VLIPI,CALIQINT,CALIQEXT")
+SetPrvt("NVLMERC,NVLICMS,NBASE,CALIQ,NVLITEM,NPESOLIQ")
+SetPrvt("QTDLIB,VLIPIAUX,VLAUXCRES,NIPIFRE,CVLTIT,NVLTIT")
+SetPrvt("AVENC,NDUP,NVALOR,NDIF,X,CVLAUXCRES")
+SetPrvt("NTESTE,CVLIPI,NVLIPIIMP,CCONT,CBUS,CBUSCAR")
+SetPrvt("CNVLICMS,NVLICMIMP,CVLITEM,NPERCPAR,NPERC2,NPERC3")
+SetPrvt("NBASEFRE,CNVLTOTIPI,CNMERCTOT,CBASEITEM,CBASEFRE,CBASE")
+SetPrvt("CNTICMITEM,CTOTGEL,NTOTGEL,lSuframa,NVAL")
+*/
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Funcao    ³ ART001   ³ Autor ³ JEAN CARLOS PITZ      ³ Data ³ 11/05/95 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descricao ³ Pre-Nota para uso com RDMAKE.                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Especifico para a                                          ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ 05/05/00 ³ Modificado SC6->C6_QTDVEN para SC9->C9_QTDLIB   SANDRA     ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+LOCAL cDesc1       := "Pre Nota de Faturamento."
+LOCAL cDesc2       := ""
+LOCAL cDesc3       := ""
+LOCAL cPict        := ""
+LOCAL titulo       := "Pre Nota de Faturamento."
+LOCAL nLin         := 132
+LOCAL cString      := ""
+LOCAL Cabec1       := ""
+LOCAL Cabec2       := ""
+LOCAL imprime      := .T.
+LOCAL aOrd         := {}
+Private lEnd       := .F.
+Private lAbortPrint:= .F.
+Private CbTxt      := ""
+Private limite     := 132
+Private tamanho    := "G"
+Private nomeprog   := "ART001"
+Private nTipo      := 18
+Private aReturn    := { "Zebrado", 1, "Administracao", 2, 2, 1, "", 1}
+Private nLastKey   := 0
+Private cPerg      := "ART001"
+Private cbtxt      := Space(10)
+Private cbcont     := 00
+Private CONTFL     := 01
+Private m_pag      := 01
+Private wnrel      := "ART001"
+
+cPerg    := "MTR730"
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para Impressao do Cabecalho e Rodape    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+m_pag    := 1
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas selecionadas, busca o padrao da PRE-NOTA³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+Pergunte(cPerg,.F.)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                         ³
+//³ mv_par01             // Do PEDIDO                            ³
+//³ mv_par02             // Ate o PEDIDO                         ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Envia controle para a funcao SETPRINT                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+wnrel:=SetPrint(cString,wnrel,cPerg,Titulo,cDesc1,cDesc2,cDesc3,.T.)
+
+If LastKey() == 27 .or. nLastKey == 27
+	Return
+Endif
+
+SetDefault(aReturn,cString)
+
+If LastKey() == 27 .or. nLastKey == 27
+	Return
+Endif
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Salva posicoes para movimento da regua de processamento      ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+RptStatus({|| RptDetail()})
+Return
+
+Static Function RptDetail()
+
+dbSelectArea("SC5")
+dbSetOrder(1)// filial+ped                   PED. VENDAS
+dbGoTop()
+dbSeek(xFilial("SC5")+mv_par01,.T.)
+While !Eof() .and. SC5->C5_FILIAL == xFilial("SC5");
+	.and. SC5->C5_NUM <= mv_par02
+	
+	If lAbortPrint
+		@ 00,01 PSAY "** CANCELADO PELO OPERADOR **"
+		lContinua := .F.
+		Exit
+	Endif
+	
+	nvltotipi := 0.00      // total geral do ipi dos itens do pedido
+	cprivez   := 0           // controle de cabecalho
+	nBaseitem := 0.00      // base total de icms dos itens do pedido
+	nTIcmitem := 0.00      // valor total de icms dos itens do pedido
+	nPerIcm   := 0.00      // armazena maior aliquota de icms do pedido para calcular icms do frete
+	nVlIcmfre := 0.00      // armazena valor do icms do frete
+	nmerctot  := 0.00      // acumulador do total das mercadorias do pedido
+	nTotgeral := 0.00      // acumulador do valor bruto das mercadorias do pedido (SC9->C9_QTDLIB*SC9->C9_PRCVEN)
+	nDesc     := 0.00
+	cEST      := "  "
+	cALIQN    := 0.00
+	vlipi     := 0.00
+	caliqint  := 0.00
+	caliqext  := 0.00
+	nvlmerc   := 0.00
+	nvlicms   := 0.00
+	nbase     := 0.00
+	caliq     := 0.00
+	nVLITEM   := 0.00
+	nPESOLIQ  := 0.00
+	nPESOBRU  := 0.00
+	lSuframa  := .F.
+	lPisCof   := .F.
+	nVal      := 0.00
+	cCliente  := SC5->C5_CLIENTE
+	cLoja     := SC5->C5_LOJACLI
+	cMenNota  := ' '
+	cMensNota1 := ' '
+	cMensNota2 := ' '
+	cMensNota3 := ' '
+	cMensNota4 := ' '
+	cMensNota5 := ' '
+	
+	dbSelectArea("SC6")
+	SC6->(dbSetOrder(1)) // filial+pedido+item+produto   IT. DE PV
+	SC6->(DbSeek(xFilial("SC6")+SC5->C5_NUM,.F.))
+	While !SC6->(Eof()) .and. SC6->C6_FILIAL == xFilial("SC6") .and. SC6->C6_NUM == SC5->C5_NUM
+		dbSelectArea("SC9")
+		SC9->(DbSetOrder(1)) // filial+ped+item+sequencia    PED. VENDAS
+		If SC9->(DbSeek(xFilial("SC9")+SC6->C6_NUM+SC6->C6_ITEM,.F.))
+			While !SC9->(Eof()) .and. SC9->C9_FILIAL==xFilial("SC9") .and. SC9->C9_PEDIDO==SC6->C6_NUM .and. SC9->C9_ITEM==SC6->C6_ITEM
+//				If (Empty(SC9->C9_BLEST) .and. Empty(SC9->C9_BLCRED))
+					QTDLIB := SC9->C9_QTDLIB
+//				Else
+//					QTDLIB := 0
+//				Endif
+				SC9->(DbSkip())
+			Enddo
+		Else
+			QTDLIB := 0
+		Endif
+		
+		dbSelectArea("SB1")
+		SB1->(DbSetOrder(1)) 
+		SB1->(DbSeek(xFilial("SB1")+SC6->C6_PRODUTO,.F.))
+		
+		dbSelectArea("SF4")
+		SF4->(DbSetOrder(1)) 
+		SF4->(DbSeek(xFilial("SF4")+SC6->C6_TES,.F.))
+		
+		vlipiAux  := 0.0000
+		
+		***** TRATATIVA DE ACRESCIMO FINANCEIRO ****
+		
+		vlauxcres := 0.0000
+		
+		If SC5->C5_ACRSFIN # 0.00
+			vlauxcres := SC6->C6_PRCVEN+((SC6->C6_PRCVEN*SC5->C5_ACRSFIN)/100)
+		Else
+			vlauxcres := SC6->C6_PRCVEN
+		Endif
+		
+		If SF4->F4_IPI == "S"
+			vlipiAux := (QTDLIB*vlauxcres*SB1->B1_IPI) / 100
+		Endif
+		
+		nTotgeral := Round (nTotgeral + ( QTDLIB * vlauxcres ) + vlipiAux, 2 )
+		
+		***** TRATATIVA DE ACRESCIMO FINANCEIRO ****
+		
+		vlauxcres := 0.0000
+		
+		If SC5->C5_ACRSFIN #0.00
+			vlauxcres := SC6->C6_PRCVEN + ((SC6->C6_PRCVEN * SC5->C5_ACRSFIN) / 100)
+		Else
+			vlauxcres := SC6->C6_PRCVEN
+		Endif
+		
+		dbSelectArea("SB1")
+		SB1->(DbSetOrder(1))
+		SB1->(DbSeek(xFilial("SB1")+SC6->C6_PRODUTO,.F.))
+		
+		dbSelectArea("SF4")
+		SF4->(DbSetOrder(1))
+		SF4->(DbSeek(xFilial("SF4")+SC6->C6_TES,.F.))
+		
+		vlipi  := 0.0000
+		
+		If SF4->F4_IPI    == "S"
+			vlipi := Round((QTDLIB * vlauxcres * SB1->B1_IPI) / 100,2)
+		endif
+		
+		If SF4->F4_INCIDE == "N" .and. SC5->C5_TIPOCLI <> "F"     // ipi na base do icms
+			nvlmerc := Round(QTDLIB * vlauxcres,2)
+		Else
+			nvlmerc := Round((QTDLIB * vlauxcres) + vlipi,2)
+		Endif
+		
+		If SC6->C6_PRODUTO <> "99999"
+			nmerctot += nvlmerc
+		Else                 
+		 
+			nDesc := nvlmerc
+		Endif
+		
+		nvltotipi := nvltotipi + vlipi     // armazena total de ipi dos itens do pedido
+		
+		dbSelectArea("SC6")
+		SC6->(DbSkip())
+
+	nPesoLiq :=+ (nPesoliq + (QTDLIB * SB1->B1_PESO))
+	nPesoBru :=+ (nPesoBru + (QTDLIB * SB1->B1_PESBRU))
+
+	End
+	
+
+	dbSelectArea("SC6")
+	SC6->(dbSetOrder(1))// filial+pedido+item+produto   IT. DE PV
+	SC6->(dbSeek(xFilial("SC6")+SC5->C5_NUM,.F.))
+	While !SC6->(Eof()) .and. SC6->C6_FILIAL == xFilial("SC6") .and. SC6->C6_NUM == SC5->C5_NUM
+		dbSelectArea("SC9")
+		SC9->(DbSetOrder(1)) // filial+ped+item+sequencia    PED. VENDAS
+		If SC9->(DbSeek(xFilial("SC9")+SC6->C6_NUM+SC6->C6_ITEM,.F.))
+			While !SC9->(Eof()) .and. SC9->C9_FILIAL==xFilial("SC9") .and. SC9->C9_PEDIDO==SC6->C6_NUM .and. SC9->C9_ITEM==SC6->C6_ITEM
+				If (Empty(SC9->C9_BLEST) .and. Empty(SC9->C9_BLCRED))
+					QTDLIB := SC9->C9_QTDLIB
+				Else
+					// QTDLIB := SC6->C6_QTDVEN
+					QTDLIB := 0
+				Endif
+				SC9->(DbSkip())
+			Enddo
+		Else
+			QTDLIB := 0
+		Endif
+		
+		dbSelectArea("SB1")
+		SB1->(DbSetOrder(1))// filial+cod para              PRODUTOS
+		SB1->(DbSeek(xFilial("SB1")+SC6->C6_PRODUTO,.F.))
+		
+		dbSelectArea("SF4")
+		SF4->(DbSetOrder(1))// filias+cod tes               TES
+		SF4->(DbSeek(xFilial("SF4")+SC6->C6_TES,.F.))
+		
+		If  cprivez == 0
+			
+			cprivez := 1
+			
+			dbSelectArea("SA1")
+			dbSetOrder(1)// filial+cod para              CLIENTES
+			dbGoTop()
+			dbSeek(xFilial("SA1")+SC5->C5_CLIENTE+SC5->C5_LOJACLI,.T.)
+			
+			If !Empty(SA1->A1_SUFRAMA)
+				lSuframa  := .T.
+				If SF4->F4_PISCRED == '4' //Desconto de PIS e COFINS
+					lPisCof := .T.
+				Endif
+			Endif
+			
+			dbSelectArea("SA2")
+			dbSetOrder(1)// filial+cod para              FORNECEDORES
+			dbGoTop()
+			dbSeek(xFilial("SA2")+SC5->C5_CLIENTE+SC5->C5_LOJACLI,.T.)
+			
+			dbSelectArea("SA3")
+			dbSetOrder(1)// filial+cod para              VENDEDORES
+			dbGoTop()
+			dbSeek(xFilial("SA3")+SC5->C5_VEND1,.T.)
+			
+			dbSelectArea("SA4")
+			dbSetOrder(1)// filial+cod para              TRANSPORTADORAS
+			dbGoTop()
+			dbSeek(xFilial("SA4")+SC5->C5_TRANSP,.T.)
+			
+			dbSelectArea("SX5")
+			dbSetOrder(1)// filial+cod tex               TABELAS
+			dbGoTop()
+			dbSeek(xFilial("SX5")+"93"+SC5->C5_ESPECI1,.T.)
+			
+			dbSelectArea("SE4")
+			dbSetOrder(1)// filial+codigo                grupos de tributacao
+			dbGoTop()
+			dbSeek(xFilial("SE4")+sc5->c5_condpag,.T.)
+			
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³ Impressao do Cabecalho da Pre-Nota                             ³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			
+			If !SC5->C5_TIPO $ "BD"
+				
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Impressao Quando Normal Dados Cliente                          ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				
+				@ 0,0 PSAY ""
+				@ pRow()  , 000 PSAY Replicate('-',132)
+				@ pRow()+1, 000 PSAY Alltrim(sm0->m0_nome)   PICTURE "@K"
+				@ pRow()  , 040 PSAY '|'
+				@ pRow()  , 042 PSAY Alltrim(sc5->c5_cliente) + '  -  ' + Alltrim(SA1->A1_NOME)
+				@ pRow()  , 104 PSAY '|  CONFIRMACAO DO PEDIDO '
+				
+				@ pRow()+1, 000 PSAY Alltrim(sm0->m0_endent)
+				@ pRow()  , 040 PSAY '|'
+				@ pRow()  , 042 PSAY 'ENDERECO : ' + Alltrim(SA1->A1_END)
+				@ pRow()  , 104 PSAY '|  '
+				
+				@ pRow()+1, 000 PSAY 'TEL: ' + Alltrim(SM0->M0_TEL)
+				@ pRow()  , 040 PSAY '|'
+				@ pRow()  , 042 PSAY 'CIDADE...: ' + Alltrim(SA1->A1_MUN)
+				@ pRow()  , 079 PSAY 'EST.: ' + Alltrim(SA1->A1_EST) + ' CEP: '
+				@ pRow()  , 093 PSAY SA1->A1_CEP PICTURE '@R 99999-999'
+				@ pRow()  , 104 PSAY '|'
+				
+				@ pRow()+1, 000 PSAY 'CGC: ' +  Alltrim(SM0->M0_CGC)
+				@ pRow()  , 040 PSAY '|'
+				@ pRow()  , 042 PSAY 'END. PGTO: ' + Alltrim(SA1->A1_ENDCOB)
+				@ pRow()  , 104 PSAY '|'
+				
+				@ pRow()+1, 000 PSAY Alltrim(sm0->m0_CIDENT) + SPACE(2) + Alltrim(sm0->m0_ESTENT)
+				@ pRow()  , 040 PSAY '|'
+				@ pRow()  , 042 PSAY 'END. ENTR.: ' + Alltrim(sa1->a1_ENDENT)
+				@ pRow()  , 104 PSAY '|  EMISSAO    : '
+				@ pRow()  , 120 PSAY sc5->c5_emissao
+				
+				@ pRow()+1, 040 PSAY '|'
+				@ pRow()  , 042 PSAY 'TEL: '+Alltrim(sa1->a1_TEL)
+				@ pRow()  , 057 PSAY 'e-Mail: '+Alltrim(SA1->A1_EMAIL)
+				@ pRow()  , 104 PSAY '|  PEDIDO NR. : ' + sc5->c5_num
+				
+				@ pRow()+1, 000 PSAY "Data Saida: "
+				@ pRow()  , 014 PSAY sc5->c5_saida
+				@ pRow()  , 040 PSAY '|'
+				If Len(SA1->A1_CGC) == 11
+					@ pRow(),   042 PSAY SA1->A1_CGC PICTURE "@R 999.999.999-99"
+				Endif
+				If Len(SA1->A1_CGC) == 14
+					@ pRow(),   042 PSAY SA1->A1_CGC PICTURE "@R 99.999.999/9999-99"
+				Endif
+				@ pRow()  , 065 PSAY 'IE: '+ Alltrim(SA1->A1_inscr)
+				@ pRow()  , 104 PSAY '|  SEU PED.NR.: ' + sc5->c5_PEDCLI
+				@ pRow()+1, 000 PSAY REPLI( '-',132)
+				
+			Else
+				
+				//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				//³ Impressao Quando Beneficiamento Dados Fornecedor               ³
+				//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+				
+				@ pRow()  , 000 PSAY Replicate('-',132)
+				@ pRow()+1, 000 PSAY sm0->m0_nome   PICTURE "@K"
+				@ pRow()  , 040 PSAY '|'
+				@ pRow()  , 042 PSAY sc5->c5_cliente + '  -  ' + sa2->a2_nome
+				@ pRow()  , 104 PSAY '|  CONFIRMACAO DO PEDIDO '
+				
+				@ pRow()+1, 000 PSAY sm0->m0_endent
+				@ pRow()  , 040 PSAY '|'
+				@ pRow()  , 042 PSAY 'ENDERECO : ' + sa2->a2_end
+				@ pRow()  , 104 PSAY '|'
+				
+				@ pRow()+1, 000 PSAY 'TEL: ' + SM0->M0_TEL
+				@ pRow()  , 040 PSAY '|'
+				@ pRow()  , 042 PSAY 'CIDADE...: ' + sa2->a2_MUN
+				@ pRow()  , 079 PSAY 'EST.: ' + sa2->a2_EST + ' CEP: '
+				@ pRow()  , 093 PSAY sa2->a2_CEP PICTURE '@R 99999-999'
+				@ pRow()  , 104 PSAY '|'
+				
+				@ pRow()+1, 000 PSAY 'CGC: ' +  sm0->m0_cgc
+				@ pRow()  , 040 PSAY '|'
+				@ pRow()  , 042 PSAY 'END. PGTO: ' + sa2->a2_end
+				@ pRow()  , 104 PSAY '|'
+				
+				@ pRow()+1, 000 PSAY sm0->m0_CIDENT + SPACE(2) + sm0->m0_ESTENT
+				@ pRow()  , 040 PSAY '|'
+				@ pRow()  , 042 PSAY 'END. ENTR.: ' + sa2->a2_END
+				@ pRow()  , 104 PSAY '|  EMISSAO    : '
+				@ pRow()  , 120 PSAY sc5->c5_emissao
+				
+				@ pRow()+1, 040 PSAY '|'
+				@ pRow()  , 042 PSAY 'TEL: '+sa2->a2_TEL
+				@ pRow()  , 079 PSAY 'BANCO: '+SC5->C5_BANCO
+				@ pRow()  , 104 PSAY '|  PEDIDO NR. : ' + sc5->c5_num
+				
+				@ pRow()+1, 000 PSAY " "
+				@ pRow()  , 040 PSAY '|'
+				If Len(SA2->A2_CGC) == 11
+					@ pRow(),   042 PSAY SA2->A2_CGC PICTURE "@R 999.999.999-99"
+				Endif
+				If Len(SA2->A2_CGC) == 14
+					@ pRow(),   042 PSAY SA2->A2_CGC PICTURE "@R 99.999.999/9999-99"
+				Endif
+				@ pRow()  , 065 PSAY 'IE: '+ SA2->A2_inscr
+				@ pRow()  , 104 PSAY '|  SEU PED.NR.: ' + sc5->c5_PEDCLI
+				@ pRow()+1, 000 PSAY REPLI( '-',132)
+				
+			Endif
+			
+			dbSelectArea("SA4")
+			dbSetOrder(1)// filial+cod para              TRANSPORTADORAS
+			dbGoTop()
+			If dbSeek(xFilial("SA4")+SC5->C5_TRANSP,.T.)
+				@ pRow()+1, 000 PSAY 'TRANSP.: ' + SC5->C5_TRANSP + ' - ' + SA4->A4_NOME
+				@ pRow()  , 059 PSAY 'TEL: '+SA4->A4_TEL
+				@ pRow()  , 080 PSAY 'PLACA DO VEICULO : '+SC5->C5_PLACA
+			Else
+				@ pRow()+1, 000 PSAY ""
+			Endif
+			
+			dbSelectArea("SA4")
+			dbSetOrder(1)// filial+cod para              TRANSPORTADORAS
+			dbGoTop()
+			If dbSeek(xFilial("SA4")+SC5->C5_REDESP,.T.)
+				@ pRow()+1, 000 PSAY 'REDES..: ' + SC5->C5_REDESP + ' - ' + SA4->A4_NOME
+				@ pRow()  , 059 PSAY 'TEL: '+SA4->A4_TEL
+			Else
+				@ pRow()+1, 000 PSAY ""
+			Endif
+			
+			
+			If !Empty(SC5->C5_VEND2)
+				dbSelectArea("SA3")
+				dbSetOrder(1)// filial+cod para              VENDEDORES
+				dbGoTop()
+				If dbSeek(xFilial("SA3")+SC5->C5_VEND2,.T.)
+					@ pRow()+1, 000 PSAY ''
+					@ pRow(), 016 PSAY sc5->c5_vend2 + ' - ' + sa3->a3_nREDUZ
+					@ pRow(), 078 PSAY Transform(SA3->A3_COMIS,'@E 99.99')
+				Endif
+			Endif
+			
+	
+			If !Empty(SC5->C5_VEND3)
+				dbSelectArea("SA3")
+				dbSetOrder(1)// filial+cod para              VENDEDORES
+				dbGoTop()
+				If dbSeek(xFilial("SA3")+SC5->C5_VEND3,.T.)
+     				@ pRow()+1, 000 PSAY ''
+					@ pRow(), 016 PSAY sc5->c5_vend3 + ' - ' + sa3->a3_nREDUZ
+					@ pRow(), 078 PSAY Transform(SA3->A3_COMIS,'@E 99.99')
+				Endif
+			Endif
+			
+			If !Empty(SC5->C5_VEND4)
+				dbSelectArea("SA3")
+				dbSetOrder(1)// filial+cod para              VENDEDORES
+				dbGoTop()
+				If dbSeek(xFilial("SA3")+SC5->C5_VEND4,.T.)
+					@ pRow()+1, 000 PSAY ''
+					@ pRow(), 016 PSAY sc5->c5_vend4 + ' - ' + sa3->a3_nREDUZ
+					@ pRow(), 078 PSAY Transform(SA3->A3_COMIS,'@E 99.99')
+				Endif
+			Endif
+			
+			If !Empty(SC5->C5_VEND5)
+				dbSelectArea("SA3")
+				dbSetOrder(1)// filial+cod para              VENDEDORES
+				dbGoTop()
+				If dbSeek(xFilial("SA3")+SC5->C5_VEND5,.T.)
+					@ pRow()+1, 000 PSAY ''
+					@ pRow(), 016 PSAY sc5->c5_vend5 + ' - ' + sa3->a3_nREDUZ
+					@ pRow(), 078 PSAY Transform(SA3->A3_COMIS,'@E 99.99')
+				Endif
+			Endif                                                                     
+
+//		   'ESPECIE: XXXXXXXXXX  | VOLUMES: 999  |  TABELA: XXX  |  PESO.L.: 99,999.99  |  PESO.B.: 99,999.99  |  FRETE: XXX
+  //         '0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012
+    //       '         10         20        30        40        50        60        70        80        90        100       110       120       130
+
+			@ pRow()+1, 000 PSAY Replicate('-',132)
+			@ pRow()+1, 000 PSAY 'ESPECIE: ' + AllTrim(sc5->c5_ESPECI1)  + ' | '
+			@ pRow(),   023 PSAY 'VOLUMES: ' + AllTrim(str(sc5->c5_volume1)) + ' | '
+			@ pRow(),   040 PSAY 'TABELA: '  + AllTrim(sc5->c5_tabela) + ' | '
+			@ pRow(),   056 PSAY 'PESO.L.: ' + Transform(nPesoliq,"@E 99,999.99")  + ' | '
+			@ pRow(),   079 PSAY 'PESO.B.: ' + Transform(nPesoBru,"@E 99,999.99")  + ' | '
+			@ pRow(),   102 PSAY 'FRETE: '   + IIF(SC5->C5_TPFRETE=='C','CIF','FOB')
+			
+			@ pRow()+1, 000 PSAY Replicate('-',132)
+			@ pRow()+1, 000 PSAY 'COND.PGTO: ' + sc5->c5_condpag + ' - ' + SE4->E4_DESCRI
+			
+			******* CALCULA IPI DO FRETE ********
+			nIPIFRE := 0.0000
+			if  sf4->f4_IPIFRET == "S"
+				nIPIFRE :=  (sc5->c5_frete*nvltotipi) / nmerctot
+			ENDIF
+			                                
+			nvltotipi := nvltotipi + nIPIFRE
+			
+			cVLTIT := SPACE(15)
+			nDescSuf := 0
+			If sc5->c5_tipocli == "F"     // ipi na base do icms
+				nVLTIT := nmerctot+sc5->c5_frete+sc5->c5_seguro+ndesc
+				//Alterado por Clovis - 11/12/06 - Considera desconto do suframa nos titulos
+				If !lSuframa
+					aVenc  := condicao(nmerctot+sc5->c5_frete+sc5->c5_seguro+ndesc,sC5->C5_condPAG)
+				Else
+					//Alterado em 30/06/09 por Clóvis. Este cliente exige desconto de pis e cofins além do icms
+					If lPisCof
+						nDescSuf := Round((nmerctot+sc5->c5_frete+sc5->c5_seguro+ndesc) * 0.07,2)
+						nDescSuf := nDescSuf + Round((nmerctot-nDescSuf+sc5->c5_frete+sc5->c5_seguro+ndesc) * 0.0365,2)
+					Else
+						nDescSuf := Round((nmerctot+sc5->c5_frete+sc5->c5_seguro+ndesc) * 0.07,2)
+					Endif
+					aVenc  := condicao(nmerctot+sc5->c5_frete+sc5->c5_seguro+ndesc-nDescSuf,sC5->C5_condPAG)
+				Endif
+			Else
+				nVLTIT := nmerctot+sc5->c5_frete+sc5->c5_seguro+nvltotipi+ndesc
+				If !lSuframa
+					aVenc  := condicao(nmerctot+sc5->c5_frete+sc5->c5_seguro+nvltotipi+ndesc,sC5->C5_condPAG,nvltotipi)
+				Else
+					//Alterado em 30/06/09 por Clóvis. Este cliente exige desconto de pis e cofins além do icms
+					If lPisCof
+						nDescSuf := Round((nmerctot+sc5->c5_frete+sc5->c5_seguro+nvltotipi+ndesc) * 0.07,2)
+						nDescSuf := nDescSuf + Round((nmerctot-nDescSuf+sc5->c5_frete+sc5->c5_seguro+nvltotipi+ndesc) * 0.0365,2)
+					Else
+						nDescSuf := Round((nmerctot+sc5->c5_frete+sc5->c5_seguro+nvltotipi+ndesc) * 0.07,2)
+					Endif
+					aVenc  := condicao(nmerctot+sc5->c5_frete+sc5->c5_seguro+nvltotipi+ndesc-nDescSuf,sC5->C5_condPAG,nvltotipi)
+				Endif
+			Endif
+			
+			nValMerc := nTotGeral - nDescSuf
+			
+			nmerctot  := 0.0000  // acumulador do total das mercadorias do pedido
+			nvltotipi := 0.0000
+			nDup      := Len(aVenc)
+			
+			nVALOR := 0.00
+			nDIF   := 0.00
+			
+			For x := 1 To nDUP
+				nVALOR := nVALOR + aVENC[X][2]
+			Next
+			
+			nDIF := nVLTIT - nVALOR
+			
+			If nmerctot > 0
+				If !lSuframa
+					aVENC[nDUP][2] := aVENC[nDUP][2] + nDIF
+				Else
+					aVENC[nDUP][2] := aVENC[nDUP][2]
+				Endif
+			Endif
+			
+			If LEN(aVENC) >= 1
+				@ pRow()+1, 000 PSAY ''
+				@ pRow(),   000 PSAY aVENC[1][1]
+				@ pRow(),   010 PSAY aVENC[1][2] PICTURE '@E 999,999,999.99'
+			Endif
+						
+			If LEN(aVENC) >= 2
+				@ pRow(),   025 PSAY '|'
+				@ pRow(),   027 PSAY aVENC[2][1]
+				@ pRow(),   037 PSAY aVENC[2][2] PICTURE '@E 999,999,999.99'
+			Endif
+			
+			
+			If LEN(aVENC) >= 3
+				@ pRow(),   052 PSAY '|'
+				@ pRow(),   054 PSAY aVENC[3][1]
+				@ pRow(),   064 PSAY aVENC[3][2] PICTURE '@E 999,999,999.99'
+			Endif
+
+			
+			If LEN(aVENC) >= 4
+				@ pRow(),   079 PSAY '|'
+				@ pRow(),   081 PSAY aVENC[4][1]
+				@ pRow(),   091 PSAY aVENC[4][2] PICTURE '@E 999,999,999.99'
+			Endif
+						
+			If LEN(aVENC) >= 5
+				@ pRow(),   106 PSAY '|'
+				@ pRow(),   108 PSAY aVENC[5][1]
+				@ pRow(),   118 PSAY aVENC[5][2] PICTURE '@E 999,999,999.99'
+			Endif
+			
+			@ pRow()+1, 000 PSAY Replicate( '-',132)
+			@ pRow()+1, 039 PSAY 'I T E N S   D O   P E D I D O   D E   V E N D A S'
+			@ pRow()+1, 000 PSAY Replicate( '-',132)
+			//                             1         2         3         4         5         6         7         8         9         100       110       120       130
+			//                    123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012
+			@ pRow()+1, 000 PSAY 'Codigo     Descricao do Material                 TES  CFO  UM AL     Quant. Vl.Unit. IPI   Vl.IPI ICMS   VL.ICMS   Tot.C/IPI  %Comis'
+			//                    0101010000 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx   501 9999  KG 04 999,999.99 9,999.99  99 9,999.99   99 99,999.99  999,999.99   99,99
+			@ pRow()+1, 000 PSAY Replicate( '-',132)
+			
+		Endif
+		
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Impressao dos itens da nota                                    ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		
+		vlipi     := 0.0000
+		caliqint  := 0.0000
+		caliqext  := 0.0000
+		nvlmerc   := 0.0000
+		nvlicms   := 0.0000
+		nbase     := 0.0000
+		caliq     := 0.0000
+		
+		***** TRATATIVA DE ACRESCIMO FINANCEIRO ****
+		vlauxcres := 0.0000
+		If SC5->C5_ACRSFIN #0.00
+			vlauxcres := sc6->c6_PRCVEN+((sc6->c6_PRCVEN*SC5->C5_ACRSFIN)/100)
+		Else
+			vlauxcres := sc6->c6_PRCVEN
+		Endif
+		
+		dbSelectArea("SB1")
+		dbSetOrder(1)// filial+cod para              PRODUTOS
+		dbGoTop()
+		dbSeek(xFilial("SB1")+SC6->C6_PRODUTO,.T.)
+		
+		dbSelectArea("SF4")
+		dbSetOrder(1)// filias+cod tes               TES
+		dbGoTop()
+		dbSeek(xFilial("SF4")+SC6->C6_TES,.T.)
+		
+//		If QTDLIB <> 0
+			If SC5->C5_TIPC = "S"
+				@ pRow()+1, 000 PSAY Substr(SB1->B1_TIPC,1,10)
+				@ pRow()  , 011 PSAY Alltrim(SC6->C6_DESCRI) + "TP C"
+			Else
+				If SC5->C5_TIPC = "E"
+					@ pRow()+1, 000 PSAY Substr(SB1->B1_TIPC,1,10)
+					@ pRow()  , 011 PSAY Alltim(SC6->C6_DESCRI) + "TP E"
+				Else
+					@ pRow()+1, 000 PSAY Substr(SC6->C6_PRODUTO,1,10)
+					@ pRow()  , 011 PSAY Alltrim(SC6->C6_DESCRI)
+				Endif
+			EndIf
+			@ pRow()  , 049 PSAY SC6->C6_TES
+			@ pRow()  , 053 PSAY SC6->C6_CF
+			@ pRow()  , 059 PSAY SC6->C6_UM
+			@ pRow()  , 062 PSAY SC6->C6_LOCAL
+			@ pRow()  , 065 PSAY QTDLIB   PICTURE  "@E 999,999.99"
+			
+			cvlauxcres := Space(15)
+			cvlauxcres := Substr(STR(vlauxcres),1,13)
+			nTESTE     := 0.0000
+			nTESTE     := vlauxcres //VAL(cvlauxcres)
+			
+			If lSuframa
+				//Alterado em 30/06/09 por Clóvis. Este cliente exige desconto de pis e cofins além do icms
+				If lPisCof
+					vlauxcres := vlauxcres * 0.8935
+				Else
+					vlauxcres := vlauxcres * 0.93
+				Endif
+			Endif
+			
+			@ pRow(),   076 PSAY nTESTE    PICTURE  "@E 9,999.99"
+			
+			cVLIPI := Space(15)
+			If SF4->F4_IPI == "S"        // calcula ipi s/n
+				@ pRow(),086 PSAY SB1->B1_IPI        PICTURE "@E 99"
+				vlipi  := (QTDLIB * vlauxcres * SB1->B1_IPI) / 100
+				cVLIPI := Str((QTDLIB * vlauxcres * SB1->B1_IPI) / 100)
+			Else
+				@ pRow(),086 PSAY "00"
+			Endif
+			
+			nVLIPIIMP := 0.0000
+			nVLIPIIMP := Val(SUBS(cVLIPI,1,13))
+			@ pRow(),089 PSAY nVLIPIIMP   PICTURE  "@E 9,999.99"
+			
+			If SF4->F4_INCIDE == "N" .and. sc5->c5_tipocli <> "F"     // ipi na base do icms
+				nvlmerc := Round((QTDLIB * vlauxcres),2)
+			Else
+				nvlmerc := Round((QTDLIB * vlauxcres)+vlipi,2)
+			Endif
+			
+			**** ALIQUOTA DO ICMS ****
+			
+			If SF4->F4_ICM   == "S"   // CALCULA ICMS
+				
+				nBASE := Round(QTDLIB * SC6->C6_PRCVEN,2)
+				
+				*****  busca aliquota empresa destino *****
+				ccont   := 1
+				cbus    := "  "
+				cbuscar := "MV_NORTE"
+				
+				If !SC5->C5_TIPO $ "BD"
+					dbSelectArea("SX6")
+					DbSetOrder(1)// fil+x6_var                   PARAMETROS
+					dbGoTop()
+					dbSeek(cbus+cbuscar,.T.)
+					While substr(sx6->x6_conteud,ccont,2) <> sa1->a1_est;
+						.AND. cCont <= 63
+						cCont   := cCont + 3
+					End
+					cEST    := substr(sx6->x6_conteud,ccont,2)
+					cAliqN  := 7
+					
+					If  SA1->A1_EST == "SC"
+						nVlicms  := (nbase * 17 ) /100
+						cALIQ := 17
+					Elseif SA1->A1_EST == cEST
+						nVlicms  := (nbase *  cALIQN ) /100
+						cALIQ := cALIQN
+					Else
+						nVlicms  := (nbase *  12 ) /100
+						cALIQ := 12
+					Endif
+				Else
+					dbSelectArea("SX6")
+					DbSetOrder(1)// fil+x6_var                   PARAMETROS
+					dbGoTop()
+					dbSeek(cbus+cbuscar,.T.)
+					While substr(sx6->x6_conteud,ccont,2) <> sa1->a1_est;
+						.AND. cCont <= 63
+						cCont   := cCont + 3
+					End
+					cEST    := substr(sx6->x6_conteud,ccont,2)
+					cAliqN  := 7
+					
+					If  SA2->A2_EST == "SC"
+						//					nVlicms  := ROUND((nbase * 17 ) /100,4)
+						nVlicms  := (nbase * 17 ) /100
+						cALIQ := 17
+					Elseif SA2->A2_EST == cEST
+						//					nVlicms  := ROUND((nbase *  cALIQN ) /100 ,4)
+						nVlicms  := (nbase *  cALIQN ) /100
+						cALIQ := cALIQN
+					Else
+						//				nVlicms  := ROUND((nbase *  12 ) /100 ,4)
+						nVlicms  := (nbase *  12 ) /100
+						cALIQ := 12
+					Endif
+				Endif
+			Endif
+			
+			@ pRow(),   100 PSAY  cAliq          PICTURE "@E 99"
+			cnvlicms  := SPACE(15)
+			cnvlicms  := SUBS(STR(nvlicms),1,13)
+			nVLICMIMP := 0.00
+			nVLICMIMP := VAL(cnvlicms)
+			@ pRow(),   103 PSAY  nvlicms        PICTURE "@E 99,999.99"
+			
+			cVLITEM := SPACE(15)
+			cVLITEM := SUBS(STR((QTDLIB*vlauxcres)+vlipi),1,13)
+			nVLITEM := 0.00
+			//	If SC5->C5_TIPC = "S"
+			//	  nVLITEM := VAL(cVLITEM) / 2
+			// @ pRow(),   105 PSAY (((QTDLIB*nTeste)+vlipi) / 2)  PICTURE "@E 999,999.99"
+			//Else
+			nVLITEM := VAL(cVLITEM)
+			@ pRow(),   114 PSAY (QTDLIB*nTeste)+vlipi    PICTURE "@E 999,999.99"
+			//	EndIf
+//			@ pRow(),   120 PSAY SC6->C6_ENTREG
+			@ pRow(),   127 PSAY SC6->C6_comis1 		PICTURE "@E 99.99"
+			
+			If SC6->C6_PRODUTO <> "99999"
+				//			nmerctot  := nmerctot  + ROUND(nvlmerc,4)
+				nmerctot  := nmerctot  + nvlmerc
+			Else
+				nDesc := nvlmerc
+			Endif
+			
+			//		nBaseitem := nBaseitem + ROUND(nbase  ,4)    // armazena total da base dos itens
+			//		nTIcmitem := nTIcmitem + ROUND(nvlicms,4)    // armazena total de icms dos itens
+			//		nvltotipi := nvltotipi + ROUND(vlipi  ,4)    // armazena total de ipi dos itens do pedido
+			nBaseitem := nBaseitem + nbase  	// armazena total da base dos itens
+			nTIcmitem := nTIcmitem + nvlicms    // armazena total de icms dos itens
+			nvltotipi := nvltotipi + vlipi      // armazena total de ipi dos itens do pedido
+			
+			nPercPar :=  0.0000
+			nPerc2   :=  0.0000
+			nPerc3   :=  0.0000
+			nvalor   :=  0.0000
+			
+			If SC5->C5_FRETE <> 0.00
+				***** CALCULA ICMS DO FRETE ********
+				//			nvalor   :=  ROUND((QTDLIB*vlauxcres) + vlipi,4)
+				//			nPercPar :=  ROUND((nvalor * 100) / nTotgeral ,4)    // acha percentual de participacao
+				//			nPerc2   :=  ROUND((SC5->C5_FRETE * nPercPar) / 100 ,4)            // acha valor do frete referente ao item
+				nvalor   :=  (QTDLIB*vlauxcres) + vlipi
+				nPercPar :=  (nvalor * 100) / nTotgeral    // acha percentual de participacao
+				nPerc2   :=  (SC5->C5_FRETE * nPercPar) / 100            // acha valor do frete referente ao item
+				If  sf4->f4_baseicm  <> 0.00
+					//				nPerc3 :=ROUND((((nPerc2 * sf4->f4_baseicm) / 100) * CALIQ) / 100,4)
+					nPerc3 := (((nPerc2 * sf4->f4_baseicm) / 100) * CALIQ) / 100
+				Else
+					//				nPerc3 := ROUND((nPerc2 * CALIQ) / 100,4)
+					nPerc3 := (nPerc2 * CALIQ) / 100
+				Endif
+			Endif
+			//		nVlIcmfre := nVlIcmfre + ROUND(nPerc3,4)         // soma total do  icms do frete
+			nVlIcmfre := nVlIcmfre + nPerc3         // soma total do  icms do frete
+//		Endif
+		
+		dbSelectArea("SC6")
+		DbSkip()
+	End
+	
+	If cprivez == 1
+		
+		nTIcmitem := nTIcmitem + nVlIcmfre           // junta icms dos itens com o icms do frete
+		nBasefre  := 0.0000
+		
+		If SC5->C5_FRETE <> 0.00
+			If  sf4->f4_baseicm  <> 0.00
+				nBasefre  := (SC5->C5_FRETE * sf4->f4_baseicm) / 100
+			Else
+				nBasefre  := SC5->C5_FRETE
+			Endif
+		Endif
+		       
+		cMensNota1 := Alltrim(Substr(SC5->C5_MENNOTA,001,132))
+		cMensNota2 := Alltrim(Substr(SC5->C5_MENNOTA,133,132))
+		cMensNota3 := Alltrim(Substr(SC5->C5_MENNOTA,266,132))
+		cMensNota4 := Alltrim(Substr(SC5->C5_MENNOTA,398,132))
+		cMensNota5 := Alltrim(Substr(SC5->C5_MENNOTA,530,132))
+
+		@ pRow()+3, 000 PSAY Replicate('-',132)
+		@ pRow()+1, 000 PSAY "Mensagem para Nota Fiscal: 
+		
+		If Len(cMensNota1) > 1 
+			@ pRow()+1, 000 PSAY cMensNota1
+		EndIf
+		
+		If Len(cMensNota2) > 1 
+			@ pRow()+1, 000 PSAY cMensNota2
+		EndIf
+		
+		If Len(cMensNota3) > 1
+			@ pRow()+1, 000 PSAY cMensNota3
+		EndIf
+
+		If Len(cMensNota4) > 1
+			@ pRow()+1, 000 PSAY cMensNota4
+		EndIf
+
+		If Len(cMensNota5) > 1
+			@ pRow()+1, 000 PSAY cMensNota5
+		EndIf
+	
+	
+		@ pRow()+1, 000 PSAY Replicate('-',132)
+		@ pRow()+1, 000 PSAY 'FRETE..........: '
+		@ pRow()  , 017 PSAY sc5->c5_frete     PICTURE "@E 999,999.99"
+		@ pRow()  , 030 PSAY 'SEGURO....: '
+		@ pRow()  , 045 PSAY sc5->c5_seguro    PICTURE "@E 999,999.99"
+		@ pRow()  , 060 PSAY 'VALOR IPI...: '
+		
+		******* CALCULA IPI DO FRETE ********
+		nIPIFRE := 0.0000
+		If  sf4->f4_IPIFRET == "S"
+			nIPIFRE :=  (sc5->c5_frete*nvltotipi) / nmerctot
+		Endif
+		nvltotipi := nvltotipi + nIPIFRE
+		
+		cnvltotipi := SPACE(15)
+		cnvltotipi := SUBS(STR(nvltotipi),1,13)
+		nvltotipi  := VAL(cnvltotipi)
+		
+		@ pRow(),075 PSAY  nvltotipi        PICTURE "@E 999,999.99"
+		
+		@ pRow(),093 PSAY 'VALOR MERC..: '
+		
+		If !lSuframa
+			@ pRow(),106 PSAY nmerctot PICTURE "@E 999,999,999.99"
+		Else
+			//Alterado em 30/06/09 por Clóvis. Este cliente exige desconto de pis e cofins além do icms
+			If lPisCof
+				@ pRow(),106 PSAY nTotgeral PICTURE "@E 999,999,999.99"
+			Else
+				@ pRow(),106 PSAY nmerctot+nTIcmitem PICTURE "@E 999,999,999.99"
+			Endif
+		Endif
+		
+		@ pRow()+1, 000 PSAY ''
+		@ pRow(),   030 PSAY 'BASE ICMS.: '
+		
+		If !lSuframa
+			@ pRow(),045 PSAY  nBaseitem + nBasefre PICTURE "@E 999,999.99"
+		Else
+			@ pRow(),045 PSAY  0 PICTURE "@E 999,999.99"
+		Endif
+		
+		@ pRow(),060 PSAY 'VALOR ICMS..: '
+		
+		If !lSuframa
+			@ pRow(),075 PSAY nTIcmitem PICTURE "@E 999,999.99"
+		Else
+			@ pRow(),075 PSAY 0 PICTURE "@E 999,999.99"
+		Endif
+		
+		@ pRow(),093 PSAY 'VALOR TOTAL.: '
+		
+		If sc5->c5_tipocli == "F"// ipi na base do icms
+			cTOTGEL := SPACE(15)
+			cTOTGEL := SUBS(STR((nmerctot+sc5->c5_frete+sc5->c5_seguro)),1,13)
+			nTOTGEL := 0.00
+			nTOTGEL := nmerctot + sc5->c5_frete + sc5->c5_seguro + ndesc
+			@ pRow(),108 PSAY nValMerc PICTURE "@E 999,999,999.99"
+		Else
+			cTOTGEL := SPACE(15)
+			cTOTGEL := SUBS(STR((nmerctot+sc5->c5_frete+sc5->c5_seguro+nvltotipi)),1,13)
+			nTOTGEL := 0.00
+			nTOTGEL := nmerctot+sc5->c5_frete+sc5->c5_seguro+nvltotipi+ndesc
+			@ pRow(),106 PSAY nValMerc+nvltotipi PICTURE "@E 999,999,999.99"
+		Endif
+		
+		@ pRow()+1, 000 PSAY repli('-',132)
+		If !Empty(SC5->C5_COMIS1)
+			@ pRow()+1,000 PSAY 'VENDEDOR......: ' + sc5->c5_vend1 + ' - ' + sa3->a3_nome
+		Else
+			@ pRow()+1,000 PSAY 'VENDEDOR......: '
+		Endif
+		@ pRow(),067 PSAY 'COMISSAO.: '+ TRANSF(SC5->C5_COMIS1,'@E 99.99')
+		@ pRow(),085 PSAY 'VALOR....: '+ TRANSF((SC5->C5_COMIS1*nTOTGEL)/100,'@E 99,999.99')
+		
+	Endif
+	
+	dbSelectArea("SC5")
+	DbSkip()
+End
+
+If aReturn[5] == 1
+	Set Printer TO
+	dbcommitAll()
+	ourspool(wnrel)
+Endif
+MS_FLUSH()
