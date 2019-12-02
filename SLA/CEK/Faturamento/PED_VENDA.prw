@@ -209,7 +209,7 @@ For y := 1 to nPaginas
 	nConta := 0
 	
 	//Itens do Pedido
-	nIt := 160 //160
+	nIt := 240 //160
 	
 	//If Len(aItens) < 40
 	If y == nPaginas
