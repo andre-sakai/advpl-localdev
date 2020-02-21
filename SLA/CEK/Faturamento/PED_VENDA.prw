@@ -36,6 +36,7 @@ If Select("SX6") == 0
 	RpcSetEnv (xEmp,xFil,,,,,aArqs)
 Endif
 
+ 
 Private nHor
 Private nVer
 Private oBrush1
@@ -72,6 +73,8 @@ Private nTOTICM := 0
 Private nTOTIPI := 0
 Private nTOTSOL := 0
 Private nValSOL := 0
+					 
+						
 
 Private nValFrete := 0
 Private nTotal := 0
@@ -85,6 +88,10 @@ Private nPasso1 := 0
 Private nPasso2 := 0
 Private lnoItens := .F.
 
+							 
+					
+							   
+ 
 cPedido := SC5->C5_NUM
 //cPedido := "000004"
 
@@ -153,6 +160,7 @@ IIF(SC5->C5_TIPO='D' .OR. SC5->C5_TIPO='B',SA2->A2_TIPO,SA1->A1_TIPO),;         
 DbSelectArea("SC6")
 Dbsetorder(1)
 DbSeek(xFilial("SC6")+cPedido)
+  
 While !SC6->(Eof()) .and. SC6->C6_NUM == cPedido
 	
 	dbSelectArea("SB1")
@@ -166,6 +174,8 @@ While !SC6->(Eof()) .and. SC6->C6_NUM == cPedido
 	nValIPI := MaFisRet(_nitem,"IT_VALIPI")
 	nValICM := MaFisRet(_nitem,"IT_VALICM")
 	nValSOL := MaFisRet(_nitem,"IT_VALSOL")
+											  
+   
 	//				01				02						03					04			05			06				07            08	 	   09			10
 	aadd(aItens,{SC6->C6_ITEM,Alltrim(SC6->C6_PRODUTO),alltrim(SB1->B1_DESC),SC6->C6_UM,SC6->C6_QTDVEN,SC6->C6_PRCVEN,SC6->C6_VALOR,nValIPI, SC6->C6_ENTREG, SC6->C6_OPC,nValSOL}) //,SC7->C7_VALIPI,SC7->C7_DATPRF})
 	
@@ -174,17 +184,24 @@ While !SC6->(Eof()) .and. SC6->C6_NUM == cPedido
 	nTOTSOL := nTOTSOL + nValSOL
 	nTotal := nTotal+SC6->C6_VALOR
 	
+								 
 	
 	// If !Empty(nTOTSOL)
 	//nTOTSOL := Round(nTOTSOL / SC6->C6_QTDVEN,2)
 	// Endif
 	
+					 
+												 
+		
 	
 	SC6->(dbSkip())
 EndDo
 
 
 //Alert(nTOTSOL)
+	 
+  
+			
 
 RestArea(aAreaSC6)
 
@@ -331,6 +348,7 @@ If MsgYesNo("Deseja enviar o Pedido por e-mail para o Cliente?","Envio de e-mail
 	
 Endif
 
+		  
 
 Return
 
@@ -454,6 +472,15 @@ Else
 	SA2->(dbsetorder(1))
 	SA2->(dbseek(xFilial("SA2")+SC5->C5_CLIENTE+SC5->C5_LOJACLI))
 	
+   
+						   
+				
+							   
+				
+	   
+					 
+		
+   
 	oPrinter:Box( nTopoBox+80, nEsquerda, nFimBox+80, nDireita, "-4")
 	oPrinter:Fillrect( {nTopoBox+80, nEsquerda, nFimBox-60+80, nDireita }, oBrush1, "-4")
 	oPrinter:SayAlign( nTopoBox+80+3,nEsquerda+3,"Dados do Cliente",oFont8,nDireita-nEsquerda, 30, CLR_BLACK, 2, 0 )
@@ -498,6 +525,9 @@ Else
 	
 	TCQuery cQry Alias QRY New
 	
+   
+   
+   
 	oPrinter:Box( nTopoBox+160, nEsquerda, nFimBox+160, nDireita, "-4")
 	oPrinter:Fillrect( {nTopoBox+160, nEsquerda, nFimBox-60+160, nDireita }, oBrush1, "-4")
 	oPrinter:SayAlign( nTopoBox+160+3,nEsquerda+3,"Dados de Entrega",oFont8,nDireita-nEsquerda, 30, CLR_BLACK, 2, 0 )
@@ -558,7 +588,9 @@ oPrinter:Fillrect( {nTopoBox+nTot, nMeio, nFimBox-60+nTot, nDireita }, oBrush1, 
 oPrinter:SayAlign( nTopoBox+nTot+3,nMeio+3,"Totais do Pedido",oFont8,nDireita-nMeio, 30, CLR_BLACK, 2, 0 )
 oPrinter:Say( nTopoBox+nTot+nPosBox+nEL8,nMeio+083,"Valor Mercadorias: ",oFont82)
 oPrinter:Say( nTopoBox+nTot+nPosBox+nEL8,nMeio+160,Transform(nTotal,"@E 9,999,999.99"),oFont82)
+																				  
 oPrinter:Say( nTopoBox+nTot+nPosBox+(nEL8*2),nMeio+083,"Valor ICMS: ",oFont82)
+																					 
 oPrinter:Say( nTopoBox+nTot+nPosBox+(nEL8*2),nMeio+160,Transform(nTOTICM,"@E 9,999,999.99"),oFont82)
 oPrinter:Say( nTopoBox+nTot+nPosBox+(nEL8*3),nMeio+083,"Valor IPI: ",oFont82)
 oPrinter:Say( nTopoBox+nTot+nPosBox+(nEL8*3),nMeio+160,Transform(nTOTIPI,"@E 9,999,999.99"),oFont82)
@@ -636,6 +668,7 @@ Return
 User Function TExcel3()
 ***********************
 
+  
 Local oExcel
 Local cArq
 Local nArq
@@ -651,6 +684,8 @@ cPath := GetSrvProfString("ROOTPATH", "C:\MP8") + "\DATA\"
 //nArq := FCreate(cPath + cArq + ".CSV")
 nArq := FCreate("C:\TEMP\AAA.CSV")
 
+														   
+  
 If nArq == -1
 	MsgAlert("Nao conseguiu criar o arquivo!")
 	Return
@@ -665,6 +700,14 @@ FWrite(nArq, "Codigo;Nome;Endereco" + Chr(13) + Chr(10))
 //	SA1->(dbSkip())
 //End
 FWrite(nArq, "AA;BB;CC;DD" + Chr(13) + Chr(10))
+  
+							
+																																																					  
+																													  
+																				  
+																																 
+																										  
+		 
 
 FClose(nArq)
 
