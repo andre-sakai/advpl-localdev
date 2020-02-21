@@ -1,0 +1,89 @@
+#INCLUDE "TOTVS.CH"
+#INCLUDE "RESTFUL.CH"
+#INCLUDE "FWMBROWSE.CH"
+#INCLUDE "FWMVCDEF.CH"
+#INCLUDE "Protheus.ch"
+
+User Function WS002SA1()
+ 
+    //local varJson := { "teste" : { "var1" : "oioi", "var2": "oioi2", "var3": "oioi3" }}
+    Local _aCampos := ''
+    
+   	_aCampos := {}
+	aadd(_aCampos, {'CODIGO'	,.F.,'C',TAMSX3('A1_COD')[1]	,'A1_COD'})
+	aadd(_aCampos, {'LOJA'		,.F.,'C',TAMSX3('A1_LOJA')[1]	,'A1_LOJA'})
+	aadd(_aCampos, {'NOME'		,.T.,'C',TAMSX3('A1_NOME')[1]	,'A1_NOME'})
+	aadd(_aCampos, {'APELIDO'	,.T.,'C',TAMSX3('A1_NREDUZ')[1]	,'A1_NREDUZ'})
+	aadd(_aCampos, {'PESSOA'	,.T.,'C',TAMSX3('A1_PESSOA')[1]	,'A1_PESSOA'})
+	aadd(_aCampos, {'TIPO'		,.T.,'C',TAMSX3('A1_TIPO')[1]	,'A1_TIPO'})
+	aadd(_aCampos, {'ENDERECO'	,.T.,'C',TAMSX3('A1_END')[1]	,'A1_END'})
+	aadd(_aCampos, {'COMPLEMENTO',.T.,'C',TAMSX3('A1_COMPLEM')[1],'A1_COMPLEM'})
+	aadd(_aCampos, {'BAIRRO'	,.T.,'C',TAMSX3('A1_BAIRRO')[1]	,'A1_BAIRRO'})
+	aadd(_aCampos, {'UF'		,.T.,'C',TAMSX3('A1_EST')[1]	,'A1_EST'})
+	aadd(_aCampos, {'CEP'		,.T.,'C',TAMSX3('A1_CEP')[1]	,'A1_CEP'})
+	aadd(_aCampos, {'COD_MUN'	,.T.,'C',TAMSX3('A1_COD_MUN')[1],'A1_COD_MUN'})
+	aadd(_aCampos, {'CIDADE'	,.T.,'C',TAMSX3('A1_MUN')[1]	,'A1_MUN'})
+	aadd(_aCampos, {'DDD'		,.F.,'C',TAMSX3('A1_DDD')[1]	,'A1_DDD'})
+	aadd(_aCampos, {'TEL'		,.F.,'C',TAMSX3('A1_TEL')[1]	,'A1_TEL'})
+	aadd(_aCampos, {'CONTATO'	,.F.,'C',TAMSX3('A1_CONTATO')[1],'A1_CONTATO'})
+	aadd(_aCampos, {'DOC'		,.T.,'C',TAMSX3('A1_CGC')[1]	,'A1_CGC'})
+	aadd(_aCampos, {'PAIS'		,.F.,'N',TAMSX3('A1_PAIS')[1]	,'A1_PAIS'})
+	aadd(_aCampos, {'INSCR'		,.F.,'C',TAMSX3('A1_INSCR')[1]	,'A1_INSCR'})
+	aadd(_aCampos, {'PFISICA'	,.F.,'C',TAMSX3('A1_PFISICA')[1],'A1_PFISICA'})
+	aadd(_aCampos, {'INSCRM'	,.F.,'C',TAMSX3('A1_INSCRM')[1]	,'A1_INSCRM'})
+	aadd(_aCampos, {'VENDEDOR'	,.F.,'C',TAMSX3('A1_VEND')[1]	,'A1_VEND'})
+	aadd(_aCampos, {'TRANSP'	,.F.,'C',TAMSX3('A1_TRANSP')[1]	,'A1_TRANSP'})
+	aadd(_aCampos, {'CONDICAO'	,.F.,'C',TAMSX3('A1_COND')[1]	,'A1_COND'})
+	aadd(_aCampos, {'TPFRET'	,.F.,'C',TAMSX3('A1_TPFRET')[1]	,'A1_TPFRET'})
+	aadd(_aCampos, {'TABELA'	,.F.,'C',TAMSX3('A1_TABELA')[1]	,'A1_TABELA'})
+	aadd(_aCampos, {'DTNASC'	,.F.,'C',TAMSX3('A1_DTNASC')[1]	,'A1_DTNASC'})
+	aadd(_aCampos, {'TPESSOA'	,.F.,'C',TAMSX3('A1_TPESSOA')[1],'A1_TPESSOA'})
+	aadd(_aCampos, {'EMAIL'		,.T.,'C',TAMSX3('A1_EMAIL')[1]	,'A1_EMAIL'})
+	aadd(_aCampos, {'BLOQUEADO'	,.F.,'C',TAMSX3('A1_MSBLQL')[1]	,'A1_MSBLQL'})
+
+return _aCampos
+
+User Function WS002RET(_aErros)
+ 
+//    Local _cJson 
+    Local _nI := 0
+    Local _nErro := 0
+    Local _vErros := {}
+    
+    for _nI := 1 to Len(_aErros)
+    	aadd(_vErros,{_aErros[_nI][2]})
+    	_cErros := _aErros[_nI][2] + ','+ CRLF
+    	_nErro := _aErros[_nI][1]
+    Next _nI
+
+    
+    _cRet := FWJsonSerialize(_aErros,.T.,.T.)
+    
+    conout('JSON',_cRet)
+
+return _cErros
+
+
+User Function WS103SA3()
+ 
+   Local _aCampos := ''
+    
+   	_aCampos := {}
+	aadd(_aCampos, {'CODIGO'	,.F.,'C',TAMSX3('A3_COD')[1]	,'A3_COD'})
+	aadd(_aCampos, {'NOME'		,.T.,'C',TAMSX3('A3_NOME')[1]	,'A3_NOME'})
+	aadd(_aCampos, {'APELIDO'	,.T.,'C',TAMSX3('A3_NREDUZ')[1]	,'A3_NREDUZ'})
+	aadd(_aCampos, {'ENDERECO'	,.T.,'C',TAMSX3('A3_END')[1]	,'A3_END'})
+	aadd(_aCampos, {'BAIRRO'	,.T.,'C',TAMSX3('A3_BAIRRO')[1]	,'A3_BAIRRO'})
+	aadd(_aCampos, {'CIDADE'	,.T.,'C',TAMSX3('A3_MUN')[1]	,'A3_MUN'})
+	aadd(_aCampos, {'ESTADO'	,.T.,'C',TAMSX3('A3_EST')[1]	,'A3_EST'})
+	aadd(_aCampos, {'DDD'		,.F.,'C',TAMSX3('A3_DDDTEL')[1]	,'A3_DDDTEL'})
+	aadd(_aCampos, {'TIPO'		,.F.,'C',TAMSX3('A3_TIPO')[1]	,'A3_TIPO'})
+	aadd(_aCampos, {'TIPO'		,.F.,'C',TAMSX3('A3_TIPO')[1]	,'A3_TIPO'})
+	aadd(_aCampos, {'TIPO'		,.F.,'C',TAMSX3('A3_TIPO')[1]	,'A3_TIPO'})
+	aadd(_aCampos, {'TIPO'		,.F.,'C',TAMSX3('A3_TIPO')[1]	,'A3_TIPO'})
+	aadd(_aCampos, {'BLOQUEIO'	,.F.,'C',TAMSX3('A3_MSBLQL')[1]	,'A3_MSBLQL'})
+	
+	conout('WS002SA3 - CAMPOS')
+	varinfo('_aCampos',_aCampos)
+
+return _aCampos
