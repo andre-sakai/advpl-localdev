@@ -11,7 +11,7 @@
 // Projeto  : Day-Brasil
 // Autor    : ANDRE SAKAI
 // Modulo   : WS
-// Função   : WS205 - CADASTRO DE PEDIDOS DE VENDAS
+// Função   : WS106 - CADASTRO DE PEDIDOS DE VENDAS
 // Descrição: WS PARA CONSULTA DE VENDEDORES
 // Retorno  : REST COM AS INFORMAÇÕES DA TABELA SC5,SC6
 // ---------+-------------------+------------------------------------------------
@@ -20,7 +20,7 @@
 // 31/01/20 | André Sakai       | Desenvolvimento Inicial.
 // ---------+-------------------+------------------------------------------------
 
-WSRESTFUL WS206 DESCRIPTION "Cadastro de Pedido de Venda"
+WSRESTFUL WS106 DESCRIPTION "Cadastro de Pedido de Venda"
 
 WSDATA PTOKEN AS STRING 
 WSDATA CTIPO AS STRING OPTIONAL 
@@ -34,16 +34,15 @@ WSDATA CWSFIL AS STRING OPTIONAL
 
 WSDATA CWSDIC AS STRING OPTIONAL 
 
-WSMETHOD GET DESCRIPTION "Consulta Pedido de Venda" WSSYNTAX "/rest/WS206 || /rest/WS206/{FILIAL}/{SERIE}/{DOC}"
+WSMETHOD GET DESCRIPTION "Consulta Pedido de Venda" WSSYNTAX "/rest/WS106 || /rest/WS106/{FILIAL}/{SERIE}/{DOC}"
 
 END WSRESTFUL
 
-WSMETHOD GET WSSERVICE WS206
+WSMETHOD GET WSSERVICE WS106
 
 Local _cVldTkn := ''
 Local _lRet := .F.
-Local _cCod := ''
-Local _nI,_nJ,_nReg, _nIni, _nFim
+Local _nI,_nJ, _nIni, _nFim
 Local _lPrepEnv := .F.
 Local nPrimeiro := 0
 Local _cAlias, _cAlias2, _cAliasC6, _cAliasNF
@@ -201,8 +200,8 @@ If Select(_cAlias) <> 0
 EndIf
 DBUseArea(.T.,"TOPCONN",TCGenQry(NIL,NIL,cQuery),_cAlias,.F.,.T.)*/
 (_cAlias)->(DBGOTOP())
-_aValidC5 := U_WSCAMPOS(SELF:CTIPO,'SC5')
-_aValidC6 := U_WSCAMPOS(SELF:CTIPO,'SC6')
+_aValidC5 := U_WS2CAMPOS(SELF:CTIPO,'SC5')
+_aValidC6 := U_WS2CAMPOS(SELF:CTIPO,'SC6')
 
 
 // define o tipo de retorno do método
@@ -322,8 +321,8 @@ IF(!(_cAlias)->(EOF()))
 
 			DBSELECTAREA(_cAliasNF)
 						
-			_aValidF2 := U_WSCAMPOS(SELF:CTIPO,'SF2')
-			_aValidD2 := U_WSCAMPOS(SELF:CTIPO,'SD2')
+			_aValidF2 := U_WS2CAMPOS(SELF:CTIPO,'SF2')
+			_aValidD2 := U_WS2CAMPOS(SELF:CTIPO,'SD2')
 			nPB := 0
 			Do While !(_cAliasNF)->(Eof())
 			    
@@ -362,7 +361,7 @@ IF(!(_cAlias)->(EOF()))
 				::SetResponse('"NF_ITENS":[')			
 				//Lista de itens
 				Do While !(_cAliasNF)->(Eof()) .And. ;
-				  cChave == (_cAliasNF)->(F2_FILIAL+F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA)		
+					cChave == (_cAliasNF)->(F2_FILIAL+F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA)		
 					::SetResponse('{')
 					_aValid := _aValidD2
 					For _nI := 1 to len(_aValid)
@@ -426,12 +425,12 @@ IF(!(_cAlias)->(EOF()))
 				
 			ENDSQL
 			
-			conout('ws206 - fin',getlastquery()[2])
+			conout('WS106 - fin',getlastquery()[2])
 
 			DBSELECTAREA(_cAliasFN)
 						
-			_aValidE1 := U_WSCAMPOS(SELF:CTIPO,'SE1')
-			_aValidE5 := U_WSCAMPOS(SELF:CTIPO,'SE5')
+			_aValidE1 := U_WS2CAMPOS(SELF:CTIPO,'SE1')
+			_aValidE5 := U_WS2CAMPOS(SELF:CTIPO,'SE5')
 			nPC := 0
 			Do While !(_cAliasFN)->(Eof())
 			    

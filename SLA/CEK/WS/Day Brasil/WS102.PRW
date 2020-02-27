@@ -8,7 +8,7 @@
 // Projeto  : Day-Brasil
 // Autor    : ANDRE SAKAI
 // Modulo   : WS
-// Função   : WS202 - CADASTRO DE CLIENTES
+// Função   : WS102 - CADASTRO DE CLIENTES
 // Descrição: WS PARA CONSULTA DE CLIENTES
 // Retorno  : REST COM AS INFORMAÇÕES DA TABELA SA1
 // ---------+-------------------+------------------------------------------------
@@ -17,7 +17,7 @@
 // 31/01/20 | André Sakai       | Desenvolvimento Inicial.
 // ---------+-------------------+------------------------------------------------
 
-WSRESTFUL WS202 DESCRIPTION "Cadastro de Clientes"
+WSRESTFUL WS102 DESCRIPTION "Cadastro de Clientes"
 
 WSDATA PTOKEN AS STRING 
 WSDATA CTIPO AS STRING OPTIONAL 
@@ -31,11 +31,11 @@ WSDATA CWSEMP AS STRING OPTIONAL
 WSDATA CWSFIL AS STRING OPTIONAL 
 
 WSDATA CWSDIC AS STRING OPTIONAL 								 
-WSMETHOD GET DESCRIPTION "Consulta de Clientes - Versao 19/02/2020" WSSYNTAX "/rest/WS202 || /rest/WS202/{doc}"
+WSMETHOD GET DESCRIPTION "Consulta de Clientes - Versao 19/02/2020" WSSYNTAX "/rest/WS102 || /rest/WS102/{doc}"
 
 END WSRESTFUL
 
-WSMETHOD GET WSSERVICE WS202
+WSMETHOD GET WSSERVICE WS102
 
 //Local _aValid := {}
 Local _cVldTkn := ''
@@ -45,7 +45,7 @@ Local _cFiltro := '', _xFiltro := '', _dFiltro := ''
 Local _nI := 0
 Local _nReg := 0
 Local _lPrepEnv := .F.
-Local _cAlias, _cContent
+Local _cAlias
 
 Private _aValid := {}
 Private _oBody
@@ -91,7 +91,7 @@ Else
 
 EndIf
 
-_aValid := U_WSCAMPOS(SELF:CTIPO,'SA1')
+_aValid := U_WS2CAMPOS(SELF:CTIPO,'SA1')
 
 // verifica se recebeu parametro pela URL
 // exemplo: http://localhost:8080/sample/1
@@ -161,7 +161,7 @@ If Len(::aURLParms) > 0
 		(_cAlias)->(dbclosearea())
 	EndIf
 	
-	conout('ws202 - filtro '+_xFiltro)
+	conout('WS102 - filtro '+_xFiltro)
 	
 	
 	BeginSql alias _cAlias
@@ -176,7 +176,7 @@ If Len(::aURLParms) > 0
 		ORDER BY A1_COD
 	EndSql
 	
-	conout('ws202 - query '+GETLASTQUERY()[2])
+	conout('WS102 - query '+GETLASTQUERY()[2])
 	
 	DBSELECTAREA(_cAlias)
 
@@ -284,7 +284,7 @@ Else
 		_xFiltro := "% %"
 	EndIf
 	
-	conout('ws202 - filtro '+_xFiltro)
+	conout('WS102 - filtro '+_xFiltro)
 	
 	
 	BeginSql alias _cAlias
@@ -298,7 +298,7 @@ Else
 		ORDER BY A1_COD
 	EndSql
 	
-	conout('ws202 - query '+GETLASTQUERY()[2])
+	conout('WS102 - query '+GETLASTQUERY()[2])
 	
 	DBSELECTAREA(_cAlias)
 
