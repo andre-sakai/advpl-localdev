@@ -29,6 +29,7 @@ WSDATA NPAGINA AS INTEGER OPTIONAL
 WSDATA NREGISTRO AS INTEGER OPTIONAL 
 WSDATA CFILTRO AS STRING OPTIONAL 
 WSDATA CDTFILTRO AS STRING OPTIONAL 
+WSDATA CTESTE AS STRING OPTIONAL 
 
 WSDATA CWSEMP AS STRING OPTIONAL 
 WSDATA CWSFIL AS STRING OPTIONAL 
@@ -60,6 +61,7 @@ Default SELF:cTipo 		:=''
 Default SELF:NPAGINA 	:=1
 Default SELF:NREGISTRO 	:=20
 Default SELF:CFILTRO 	:=''	
+Default SELF:CTESTE 	:=''	
 Default SELF:CDTFILTRO 	:=''		
 
 DEFAULT SELF:CWSEMP := '01'
@@ -339,7 +341,7 @@ Else
 					::SetResponse(', "OPCOES":"'+_aValid[_nI,6]+'"')
 				EndIf
 				::SetResponse("}")
-			
+			next
 			::SetResponse(']') //FIM DO DICIONARIO
 		EndIf
 	Else	 
@@ -567,7 +569,13 @@ If(Type('_oBody')== 'O')
 			ElseIf(_aValid[_nI,3]=='L')
 				::SetResponse('"'+_aValid[_nI,1]+'":'+AllTrim(cvaltochar(&(_aValid[_nI,5])))+iif(_nI<len(_aValid),',',''))			
 			ElseIf(_aValid[_nI,3]=='D')
-				::SetResponse('"'+_aValid[_nI,1]+'":"'+dtos(&(_aValid[_nI,5]))+'"'+iif(_nI<len(_aValid),',',''))			
+				::SetResponse('"'+_aValid[_nI,1]+'":"')
+				If(TYPE(_aValid[_nI,5])='D')
+					::SetResponse(dtos(&(_aValid[_nI,5]))+'"')
+				ElseIf(TYPE(_aValid[_nI,5])='C')
+					::SetResponse(&(_aValid[_nI,5])+'"')
+				EndIf
+				::SetResponse(iif(_nI<len(_aValid),',',''))	
 			ElseIf(_aValid[_nI,3]=='N')
 				::SetResponse('"'+_aValid[_nI,1]+'":'+AllTrim(cvaltochar(&(_aValid[_nI,5])))+iif(_nI<len(_aValid),',',''))
 			EndIf
@@ -799,12 +807,3 @@ _oModel:DeActivate()
 _oModel:Destroy()
 
 Return {_lRet,_cRet}
-
-
-USER FUNCTION WS000DAT()
-
-RETURN
-
-USER FUNCTION WS000DIC()
-
-RETURN

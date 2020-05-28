@@ -5,19 +5,19 @@
 #INCLUDE "Protheus.ch"
 
 // ##############################################################################
-// Projeto  : CEK
+// Projeto  : INDUSBELLO
 // Autor    : ANDRE SAKAI
 // Modulo   : WS
-// Função   : WS202 - CADASTRO DE CLIENTES
+// Função   : WS302 - CADASTRO DE CLIENTES
 // Descrição: WS PARA CONSULTA DE CLIENTES
 // Retorno  : REST COM AS INFORMAÇÕES DA TABELA SA1
 // ---------+-------------------+------------------------------------------------
 // Data     | Autor             | Descricao
 // ---------+-------------------+------------------------------------------------
-// 31/01/20 | André Sakai       | Desenvolvimento Inicial.
+// 17/03/20 | André Sakai       | Desenvolvimento Inicial.
 // ---------+-------------------+------------------------------------------------
 
-WSRESTFUL WS202 DESCRIPTION "Cadastro de Clientes"
+WSRESTFUL WS302 DESCRIPTION "Cadastro de Clientes"
 
 WSDATA PTOKEN AS STRING 
 WSDATA CTIPO AS STRING OPTIONAL 
@@ -31,12 +31,12 @@ WSDATA CWSEMP AS STRING OPTIONAL
 WSDATA CWSFIL AS STRING OPTIONAL 
 
 WSDATA CWSDIC AS STRING OPTIONAL 								 
-WSMETHOD GET DESCRIPTION "Consulta de Clientes" WSSYNTAX "/rest/WS202 || /rest/WS202/{doc}"
-WSMETHOD POST DESCRIPTION "Inclusão e Alteração" WSSYNTAX "/rest/WS202"
+WSMETHOD GET DESCRIPTION "Consulta de Clientes" WSSYNTAX "/rest/WS302 || /rest/WS302/{doc}"
+WSMETHOD POST DESCRIPTION "Inclusão de Clientes" WSSYNTAX "/rest/WS302"
 
 END WSRESTFUL
 
-WSMETHOD GET WSSERVICE WS202
+WSMETHOD GET WSSERVICE WS302
 
 //Local _aValid := {}
 Local _cVldTkn := ''
@@ -46,7 +46,7 @@ Local _cFiltro := '', _xFiltro := '', _dFiltro := ''
 Local _nI := 0
 Local _nReg := 0
 Local _lPrepEnv := .F.
-Local _cAlias, _cSql :=''
+Local _cAlias, _cContent
 
 Private _aValid := {}
 Private _oBody
@@ -92,7 +92,7 @@ Else
 
 EndIf
 
-_aValid := U_WSCAMPOS(SELF:CTIPO,'SA1',.F.)
+_aValid := U_WSCAMPOS(SELF:CTIPO,'SA1')
 
 // verifica se recebeu parametro pela URL
 // exemplo: http://localhost:8080/sample/1
@@ -136,21 +136,21 @@ If Len(::aURLParms) > 0
 	EndIf
 	
  
-	If(!Empty(_cFiltro))
-		IF(!Empty(_xFiltro))
+	If(!EMPTY(_cFiltro))
+		IF(!empty(_xFiltro))
 			_xFiltro += " AND "
 		ENDIF
 		_xFiltro += ' '+_cFiltro +' '
 	EndIf
 	
-	If(!Empty(_dFiltro))
-		IF(!Empty(_xFiltro))
+	If(!EMPTY(_dFiltro))
+		IF(!empty(_xFiltro))
 			_xFiltro += " AND "
 		ENDIF
 		_xFiltro += " CASE WHEN A1_USERLGA = ' ' THEN   CONVERT(VARCHAR(10), CAST(DATEADD(DAY,CONVERT(INT,Convert(nvarchar(50),(ASCII(SUBSTRING(A1_USERLGI,12,1)) - 50))+Convert(nvarchar(50),(ASCII(SUBSTRING(A1_USERLGI,16,1)) - 50))), '1996-01-01') AS DATETIME),120) ELSE CONVERT(VARCHAR(10), CAST(DATEADD(DAY,CONVERT(INT,Convert(nvarchar(50),(ASCII(SUBSTRING(A1_USERLGA,12,1)) - 50))+Convert(nvarchar(50),(ASCII(SUBSTRING(A1_USERLGA,16,1)) - 50))), '1996-01-01') AS DATETIME),120) END >= '"+_dFiltro+"' "
 	EndIf
 	
-	If(!Empty(_xFiltro))
+	If(!empty(_xFiltro))
 		_xFiltro := "% AND "+_xFiltro+"%"
 	Else
 		_xFiltro := "% %"
@@ -162,28 +162,26 @@ If Len(::aURLParms) > 0
 		(_cAlias)->(dbclosearea())
 	EndIf
 	
-	conout('WS202 - filtro '+_xFiltro)
+	conout('ws302 - filtro '+_xFiltro)
 	
 	
 	BeginSql alias _cAlias
 		%NOPARSER%
-		SELECT ROW_NUMBER() OVER(ORDER BY A1_COD ASC) REG, 
-		CASE 	WHEN A1_USERLGA = ' ' THEN   CONVERT(VARCHAR(10), CAST(DATEADD(DAY,CONVERT(INT,Convert(nvarchar(50),(ASCII(SUBSTRING(A1_USERLGI,12,1)) - 50))+Convert(nvarchar(50),(ASCII(SUBSTRING(A1_USERLGI,16,1)) - 50))), '1996-01-01') AS DATETIME),120)
-				ELSE CONVERT(VARCHAR(10), CAST(DATEADD(DAY,CONVERT(INT,Convert(nvarchar(50),(ASCII(SUBSTRING(A1_USERLGA,12,1)) - 50))+Convert(nvarchar(50),(ASCII(SUBSTRING(A1_USERLGA,16,1)) - 50))), '1996-01-01') AS DATETIME),120) 
-		END DTLGA, * , A1_COD+A1_LOJA AS CHAVE, SA1.R_E_C_N_O_ REC , SA1.D_E_L_E_T_ DEL 
-		FROM %TABLE:SA1% SA1 (NOLOCK)
+		SELECT ROW_NUMBER() OVER(ORDER BY A1_COD ASC) REG, * , A1_COD+A1_LOJA AS CHAVE,REC SA1.R_E_C_N_O_,DEL SA1.R_E_C_N_O_
+		FROM %TABLE:SA1% SA1
 		WHERE A1_FILIAL=%EXP:XFILIAL('SA1')% AND SA1.D_E_L_E_T_=' ' %EXP:_xFiltro% 
 		
 		ORDER BY A1_COD
 	EndSql
-	_cSql := GETLASTQUERY()[2]
+	
+	conout('ws302 - query '+GETLASTQUERY()[2])
 	
 	DBSELECTAREA(_cAlias)
 
 	(_cAlias)->(DBGoTop())
 	count to _nReg 
 	
-	_nIni := ( 1 + ((SELF:NPAGINA -1) * SELF:NREGISTRO ))
+	_nIni := ( 1 + (SELF:NPAGINA -1) * SELF:NREGISTRO )
 	_nFim := (SELF:NPAGINA * SELF:NREGISTRO)
 	
 	SET FILTER TO REG >= _nIni .and. REG <=_nFim
@@ -193,11 +191,7 @@ If Len(::aURLParms) > 0
 	
 	If(!(_cAlias)->(EOF()))	
 	
-		::SetResponse('{')
-		IF(SELF:CTESTE='SQL')
-			::SetResponse('"SQL":"'+STRTRAN(STRTRAN(_cSql,'	',''),'"','')+'",')
-		ENDIF
-		::SetResponse('"REGISTROS":[')
+		::SetResponse('{"REGISTROS":[')
 	
 		_nJ := 1
 		While((_cAlias)->(!Eof()))
@@ -207,43 +201,27 @@ If Len(::aURLParms) > 0
 					::SetResponse(',')			
 				EndIf
 				::SetResponse('{')
-				::SetResponse('"REG_NUM":'+cvaltochar((_cAlias)->REG)+',')				
-				IF((_cAlias)->(FIELDPOS('CHAVE'))>0)
-					::SetResponse('"CHAVE":"'+(_cAlias)->CHAVE+'",')		
-				EndIf		
-				IF((_cAlias)->(FIELDPOS('REC'))>0)
-					::SetResponse('"RECNO":'+CVALTOCHAR((_cAlias)->REC)+',')	
-				EndIf
-				IF((_cAlias)->(FIELDPOS('DEL'))>0)
-					::SetResponse('"DELETADO":"'+(_cAlias)->DEL+'",')	
-				EndIf
-				IF((_cAlias)->(FIELDPOS('DTLGA'))>0)
-					::SetResponse('"DTALT":"'+(_cAlias)->DTLGA+'",')	
-				EndIf
-				IF((_cAlias)->(FIELDPOS('A1_WSDTALT'))>0)
-					::SetResponse('"DTHALT":"'+ALLTRIM((_cAlias)->A1_WSDTALT)+'",')	
-				EndIf
+				::SetResponse('"REG_NUM":'+cvaltochar((_cAlias)->REG)+',')
+				::SetResponse('"DTALT":"'+(_cAlias)->DTLGA+'",')
+				::SetResponse('"CHAVE":"'+(_cAlias)->(A1_COD+A1_LOJA)+'",')
 				For _nI := 1 to len(_aValid)
 					If(_aValid[_nI,3]=='C')
-						::SetResponse('"'+_aValid[_nI,1]+'":"'+AllTrim(STRTRAN(STRTRAN(noacento(&(_aValid[_nI,5])),'"',''),'	',''))+'"'+iif(_nI<len(_aValid),',',''))
+						::SetResponse('"'+_aValid[_nI,1]+'":"'+AllTrim(STRTRAN(noacento(&(_aValid[_nI,5])),'"',''))+'"'+iif(_nI<len(_aValid),',',''))
 					ElseIf(_aValid[_nI,3]=='M')
 						::SetResponse('"'+_aValid[_nI,1]+'":"'+AllTrim(&(_aValid[_nI,5]))+'"'+iif(_nI<len(_aValid),',',''))
 					ElseIf(_aValid[_nI,3]=='O')
 						//não tratado - somente para compatibilidade com outras funções
 					ElseIf(_aValid[_nI,3]=='L')
-						//::SetResponse('"'+_aValid[_nI,1]+'":'+AllTrim(cvaltochar(&(_aValid[_nI,5])))+iif(_nI<len(_aValid),',',''))			
-						::SetResponse('"'+_aValid[_nI,1]+'":"')
-						If(TYPE(_aValid[_nI,5])='D')
-							::SetResponse(dtos(&(_aValid[_nI,5]))+'"')
-						ElseIf(TYPE(_aValid[_nI,5])='C')
-							::SetResponse(&(_aValid[_nI,5])+'"')
-						EndIf
-						::SetResponse(iif(_nI<len(_aValid),',',''))							
+						::SetResponse('"'+_aValid[_nI,1]+'":'+AllTrim(cvaltochar(&(_aValid[_nI,5])))+iif(_nI<len(_aValid),',',''))			
+					ElseIf(_aValid[_nI,3]=='D')
+						::SetResponse('"'+_aValid[_nI,1]+'":"'+dtos(&(_aValid[_nI,5]))+'"'+iif(_nI<len(_aValid),',',''))			
 					ElseIf(_aValid[_nI,3]=='N')
 						::SetResponse('"'+_aValid[_nI,1]+'":'+AllTrim(cvaltochar(&(_aValid[_nI,5])))+iif(_nI<len(_aValid),',',''))
 					EndIf
 					
 				Next
+				::SetResponse('"DELETADO":"'+(_cAlias)->DEL+'",')
+				::SetResponse('"RECNO":'+CVALTOCHAR((_cAlias)->REC)+'')
 				::SetResponse('}')
 				_lRet := .T.
 			//EndIf
@@ -253,7 +231,7 @@ If Len(::aURLParms) > 0
 		EndDo
 		::SetResponse(']')
 		::SetResponse(', "QUANTIDADE":'+CVALTOCHAR(_nReg))
-		::SetResponse(', "PAGINA":'+CVALTOCHAR(SELF:NPAGINA))	
+		::SetResponse(', "PAGINA":'+CVALTOCHAR(SELF:NPAGINA))
 		If(SELF:CWSDIC=='S')
 			::SetResponse(', "DICIONARIO":[')
 			For _nI := 1 to len(_aValid)
@@ -261,11 +239,11 @@ If Len(::aURLParms) > 0
 					::SetResponse(",")
 				EndIf
 				::SetResponse("{")
-				::SetResponse('"CAMPO":"'+_aValid[_nI,1]+'"')
-				::SetResponse(',"TIPO":"'+_aValid[_nI,3]+'"')
-				::SetResponse(',"TAM":'+CVALTOCHAR(_aValid[_nI,4])+'')
-				::SetResponse(',"DESCRICAO":"'+AllTrim(STRTRAN(noacento(_aValid[_nI,7]),'"',''))+'"')
-				::SetResponse(',"CAMPO_PROTHEUS":"'+_aValid[_nI,5]+'"')
+				::SetResponse('"CAMPO":"'+_aValid[_nI,1]+'",')
+				::SetResponse('"TIPO":"'+_aValid[_nI,3]+'",')
+				::SetResponse('"TAM":'+CVALTOCHAR(_aValid[_nI,4])+',')
+				::SetResponse('"DESCRICAO":"'+_aValid[_nI,7]+'"')
+				::SetResponse('"CAMPO_PROTHEUS":"'+_aValid[_nI,5]+'"')
 				IF(!EMPTY(_aValid[_nI,6]))
 					::SetResponse(', "OPCOES":"'+_aValid[_nI,6]+'"')
 				EndIf
@@ -275,7 +253,7 @@ If Len(::aURLParms) > 0
 		ENDIF
 	ElsE
 		::SetResponse('{"ID":402,"Erro":"Nenhum cadastro encontrado !"}')
-		SetRestFault(402,'Nenhum cadastro encontrado! Verifique as informações enviadas!'+IIF(SELF:CTESTE='SQL',_cSql,''))
+		SetRestFault(402,'Nenhum cadastro encontrado! Verifique as informações enviadas!')
 		return .f.
 	EndIf
 	::SetResponse('}')
@@ -295,11 +273,13 @@ Else
 		_xFiltro += ' '+_cFiltro +' '
 	EndIf
 	
-	If(!EMPTY(_dFiltro))
-		IF(!empty(_xFiltro))
-			_xFiltro += " AND "
-		ENDIF
-		_xFiltro += " CASE WHEN A1_USERLGA = ' ' THEN   CONVERT(VARCHAR(10), CAST(DATEADD(DAY,CONVERT(INT,Convert(nvarchar(50),(ASCII(SUBSTRING(A1_USERLGI,12,1)) - 50))+Convert(nvarchar(50),(ASCII(SUBSTRING(A1_USERLGI,16,1)) - 50))), '1996-01-01') AS DATETIME),120) ELSE CONVERT(VARCHAR(10), CAST(DATEADD(DAY,CONVERT(INT,Convert(nvarchar(50),(ASCII(SUBSTRING(A1_USERLGA,12,1)) - 50))+Convert(nvarchar(50),(ASCII(SUBSTRING(A1_USERLGA,16,1)) - 50))), '1996-01-01') AS DATETIME),120) END >= '"+_dFiltro+"' "
+	If(!Empty(_dFiltro))
+		If(SA1->(FIELDPOS('A1_USERLGA')))
+			If(!Empty(_xFiltro))
+				_xFiltro += " AND "
+			EndIf
+			_xFiltro += " CASE WHEN A1_USERLGA = ' ' THEN   CONVERT(VARCHAR(10), CAST(DATEADD(DAY,CONVERT(INT,Convert(nvarchar(50),(ASCII(SUBSTRING(A1_USERLGI,12,1)) - 50))+Convert(nvarchar(50),(ASCII(SUBSTRING(A1_USERLGI,16,1)) - 50))), '1996-01-01') AS DATETIME),120) ELSE CONVERT(VARCHAR(10), CAST(DATEADD(DAY,CONVERT(INT,Convert(nvarchar(50),(ASCII(SUBSTRING(A1_USERLGA,12,1)) - 50))+Convert(nvarchar(50),(ASCII(SUBSTRING(A1_USERLGA,16,1)) - 50))), '1996-01-01') AS DATETIME),120) END >= '"+_dFiltro+"' "
+		EndIf
 	EndIf
 	If(!Empty(_xFiltro))
 		_xFiltro := "% AND "+_xFiltro+"%"
@@ -307,27 +287,32 @@ Else
 		_xFiltro := "% %"
 	EndIf
 	
-	conout('WS202 - filtro '+_xFiltro)
+	conout('ws302 - filtro '+_xFiltro)
 	
+	If(SELF:CFILTRO = "SQL")
+		::SetResponse('{"FILTRO":"'+_xFiltro+'"}')
+		return .t.
+	EndIf
 	
 	BeginSql alias _cAlias
 		%NOPARSER%
 		SELECT ROW_NUMBER() OVER(ORDER BY A1_COD ASC) REG, 
 		CASE 	WHEN A1_USERLGA = ' ' THEN   CONVERT(VARCHAR(10), CAST(DATEADD(DAY,CONVERT(INT,Convert(nvarchar(50),(ASCII(SUBSTRING(A1_USERLGI,12,1)) - 50))+Convert(nvarchar(50),(ASCII(SUBSTRING(A1_USERLGI,16,1)) - 50))), '1996-01-01') AS DATETIME),120)
 				ELSE CONVERT(VARCHAR(10), CAST(DATEADD(DAY,CONVERT(INT,Convert(nvarchar(50),(ASCII(SUBSTRING(A1_USERLGA,12,1)) - 50))+Convert(nvarchar(50),(ASCII(SUBSTRING(A1_USERLGA,16,1)) - 50))), '1996-01-01') AS DATETIME),120) 
-		END DTLGA, * , A1_COD+A1_LOJA AS CHAVE, SA1.R_E_C_N_O_ REC, SA1.D_E_L_E_T_ DEL
-		FROM %TABLE:SA1% SA1 (NOLOCK)
+		END DTLGA, * , A1_COD+A1_LOJA AS CHAVE
+		FROM %TABLE:SA1% SA1
 		WHERE A1_FILIAL=%EXP:XFILIAL('SA1')% AND SA1.D_E_L_E_T_=' ' %EXP:_xFiltro%
 		ORDER BY A1_COD
 	EndSql
-	_cSql := GETLASTQUERY()[2]
+	
+	conout('ws302 - query '+GETLASTQUERY()[2])
 	
 	DBSELECTAREA(_cAlias)
 
 	(_cAlias)->(DBGoTop())
 	count to _nReg 
 	
-	_nIni := ( 1 + ((SELF:NPAGINA -1) * SELF:NREGISTRO ))
+	_nIni := ( 1 + (SELF:NPAGINA -1) * SELF:NREGISTRO )
 	_nFim := (SELF:NPAGINA * SELF:NREGISTRO)
 	
 	SET FILTER TO REG >= _nIni .and. REG <=_nFim
@@ -337,11 +322,7 @@ Else
 	
 	If(!(_cAlias)->(EOF()))	
 	
-		::SetResponse('{')
-		IF(SELF:CTESTE='SQL')
-			::SetResponse('"SQL":"'+STRTRAN(STRTRAN(_cSql,'	',''),'"','')+'",')
-		ENDIF
-		::SetResponse('"REGISTROS":[')
+		::SetResponse('{"REGISTROS":[')
 	
 		_nJ := 1
 		While((_cAlias)->(!Eof()))
@@ -352,42 +333,20 @@ Else
 				EndIf
 				::SetResponse('{')
 				::SetResponse('"REG_NUM":'+cvaltochar((_cAlias)->REG)+',')
-				IF((_cAlias)->(FIELDPOS('CHAVE'))>0)
-					::SetResponse('"CHAVE":"'+(_cAlias)->CHAVE+'",')		
-				endif		
-				IF((_cAlias)->(FIELDPOS('REC'))>0)
-					::SetResponse('"RECNO":'+CVALTOCHAR((_cAlias)->REC)+',')	
-				endif
-				IF((_cAlias)->(FIELDPOS('DEL'))>0)
-					::SetResponse('"DELETADO":"'+(_cAlias)->DEL+'",')	
-				endif
-				IF((_cAlias)->(FIELDPOS('DTLGA'))>0)
+				If((_cAlias)->(FIELDPOS("DTLGA")))
 					::SetResponse('"DTALT":"'+(_cAlias)->DTLGA+'",')	
-				ENDIF	
-				IF((_cAlias)->(FIELDPOS('A1_WSDTALT'))>0)
-					::SetResponse('"DTHALT":"'+ALLTRIM((_cAlias)->A1_WSDTALT)+'",')	
-				EndIf										   
+				EndIf													   
 				For _nI := 1 to len(_aValid)
 					If(_aValid[_nI,3]=='C')
-						//conout(varinfo('_a',_aValid[_nI]))
-						//::SetResponse('"'+_aValid[_nI,1]+'":"'+AllTrim(STRTRAN(STRTRAN(noacento(&(_aValid[_nI,5])),'"',''),'	',''))+'"'+iif(_nI<len(_aValid),',',''))
-						::SetResponse('"'+_aValid[_nI,1]+'":"'+alltrim(formatjson(&(_aValid[_nI,5])))+'"'+iif(_nI<len(_aValid),',',''))
-
+						::SetResponse('"'+_aValid[_nI,1]+'":"'+AllTrim(STRTRAN(noacento(&(_aValid[_nI,5])),'"',''))+'"'+iif(_nI<len(_aValid),',',''))
 					ElseIf(_aValid[_nI,3]=='M')
-						//::SetResponse('"'+_aValid[_nI,1]+'":"'+AllTrim(&(_aValid[_nI,5]))+'"'+iif(_nI<len(_aValid),',',''))
+						::SetResponse('"'+_aValid[_nI,1]+'":"'+AllTrim(&(_aValid[_nI,5]))+'"'+iif(_nI<len(_aValid),',',''))
 					ElseIf(_aValid[_nI,3]=='O')
 						//não tratado - somente para compatibilidade com outras funções
 					ElseIf(_aValid[_nI,3]=='L')
 						::SetResponse('"'+_aValid[_nI,1]+'":'+AllTrim(cvaltochar(&(_aValid[_nI,5])))+iif(_nI<len(_aValid),',',''))			
 					ElseIf(_aValid[_nI,3]=='D')
-						//::SetResponse('"'+_aValid[_nI,1]+'":"'+dtos(&(_aValid[_nI,5]))+'"'+iif(_nI<len(_aValid),',',''))
-						::SetResponse('"'+_aValid[_nI,1]+'":"')
-						If(TYPE(_aValid[_nI,5])='D')
-							::SetResponse(dtos(&(_aValid[_nI,5]))+'"')
-						ElseIf(TYPE(_aValid[_nI,5])='C')
-							::SetResponse(&(_aValid[_nI,5])+'"')
-						EndIf
-						::SetResponse(iif(_nI<len(_aValid),',',''))				
+						::SetResponse('"'+_aValid[_nI,1]+'":"'+dtos(&(_aValid[_nI,5]))+'"'+iif(_nI<len(_aValid),',',''))			
 					ElseIf(_aValid[_nI,3]=='N')
 						::SetResponse('"'+_aValid[_nI,1]+'":'+AllTrim(cvaltochar(&(_aValid[_nI,5])))+iif(_nI<len(_aValid),',',''))
 					EndIf
@@ -402,7 +361,7 @@ Else
 		EndDo
 		::SetResponse(']')
 		::SetResponse(', "QUANTIDADE":'+CVALTOCHAR(_nReg))
-		::SetResponse(', "PAGINA":'+CVALTOCHAR(SELF:NPAGINA))	
+		::SetResponse(', "PAGINA":'+CVALTOCHAR(SELF:NPAGINA))
 		If(SELF:CWSDIC=='S')
 		::SetResponse(', "DICIONARIO":[')
 		For _nI := 1 to len(_aValid)
@@ -410,11 +369,11 @@ Else
 				::SetResponse(",")
 			EndIf
 			::SetResponse("{")
-			::SetResponse('"CAMPO":"'+_aValid[_nI,1]+'"')
-			::SetResponse(',"TIPO":"'+_aValid[_nI,3]+'"')
-			::SetResponse(',"TAM":'+CVALTOCHAR(_aValid[_nI,4])+'')
-			::SetResponse(',"DESCRICAO":"'+_aValid[_nI,7]+'"')
-			::SetResponse(',"CAMPO_PROTHEUS":"'+_aValid[_nI,5]+'"')
+			::SetResponse('"CAMPO":"'+_aValid[_nI,1]+'",')
+			::SetResponse('"TIPO":"'+_aValid[_nI,3]+'",')
+			::SetResponse('"TAM":'+CVALTOCHAR(_aValid[_nI,4])+',')
+			::SetResponse('"DESCRICAO":"'+_aValid[_nI,7]+'"')
+			::SetResponse('"CAMPO_PROTHEUS":"'+_aValid[_nI,5]+'"')
 			IF(!EMPTY(_aValid[_nI,6]))
 				::SetResponse(', "OPCOES":"'+_aValid[_nI,6]+'"')
 			EndIf
@@ -443,10 +402,13 @@ EndIf
 
 Return .T.
 
-WSMETHOD POST WSSERVICE WS202
+
+ 
+WSMETHOD POST WSSERVICE WS302
 Local _lRet  	:= .T.
 Local _lRet2 	:= .F.
 Local _nI 		:= 0
+Local _nJ 		:= 0
 //Local _nMaxReg := 30
 Local _oModel
 Local _cContent := ''
@@ -489,6 +451,15 @@ If (SELF:CTESTE = "SIM")
 	::SetResponse(VARINFO('Body',_oBody,,.F.))
 	Return .T.
 EndIf
+
+_nI := 1
+While(Type('_oBody')='U' .and. _nI < 5)
+	FWJsonDeserialize(_cContent,@_oBody)
+	_nI++
+	If(type('_oBody')!='U')
+		EXIT
+	EndIf
+EndDo
 
 _aValid := U_WSCAMPOS(SELF:CTIPO,'SA1')
 
@@ -552,7 +523,7 @@ If(Type('_oBody')== 'O')
 			_oModel:SetOperation(MODEL_OPERATION_INSERT)
 			_oModel:Activate()
 			_oModel:SetValue(_cModel,"A1_COD",GETSXENUM('SA1','A1_COD'))	
-			_oModel:SetValue(_cModel,"A1_LOJA",STRZERO(1,tamsx3('A1_LOJA')[1]))	
+			_oModel:SetValue(_cModel,"A1_LOJA","01")	
 		EndIf
 		
 		_nI := 1
@@ -566,15 +537,16 @@ If(Type('_oBody')== 'O')
 			_oModel:CommitData()	
 			_cContent := '"CADASTRO REALIZADO"'
 			_lRet2 := .T.
-
+				::setresponse('{"CODIGO":"'+SA1->A1_COD+'","LOJA:"}')
+			return .t.
 	
 		Else	
-			_cContent := '"ERRO - '
+			_cContent := '"ERRO":"'
 			_cContent += _oModel:GetErrorMessage()[6]
 			_cContent += '"'
-			_lRet2 := .F.
 
-
+			::setresponse('{'+_cContent+'}')
+			return .t.
 		EndIf	
 			
 		_oModel:DeActivate()
@@ -584,15 +556,12 @@ If(Type('_oBody')== 'O')
 		::SetResponse(_cContent)
 	Else
 		If(Len(_aRetError)>0)
-			//Return {.f.,500,"ERRO:"+_aRetError[1][2]}
-			Return {.f.,500,"ERRO:"}//+_aRetError[1][2]}
+			Return {.f.,500,U_WS002RET(_aRetError)}
 		EndIf
 		
 	EndIf
 	IF(_lRet2)
 		::SetResponse(',"RESULTADO":{')
-		
-		dbselectarea("SA1")
 
 		_aValidaA1 := U_WSCAMPOS('','SA1')
 			
@@ -600,37 +569,30 @@ If(Type('_oBody')== 'O')
 		_cAlias := "SA1"
 		dbselectarea(_cAlias)
 	
-		
-
-
-		::SetResponse('"CHAVE":"'+SA1->(A1_COD+A1_LOJA)+'",')
-		
-		
-
 		For _nI := 1 to len(_aValid)
 			If(_aValid[_nI,3]=='C')
-				::SetResponse('"'+_aValid[_nI,1]+'":"'+alltrim(formatjson(&(_aValid[_nI,5])))+'"'+iif(_nI<len(_aValid),',',''))
+				::SetResponse('"'+_aValid[_nI,1]+'":"'+alltrim(&(_aValid[_nI,5]))+'"'+iif(_nI<len(_aValid),',',''))
 			ElseIf(_aValid[_nI,3]=='M')
-				::SetResponse('"'+_aValid[_nI,1]+'":"'+alltrim(formatjson(&(_aValid[_nI,5])))+'"'+iif(_nI<len(_aValid),',',''))
+				::SetResponse('"'+_aValid[_nI,1]+'":"'+alltrim(&(_aValid[_nI,5]))+'"'+iif(_nI<len(_aValid),',',''))
 			ElseIf(_aValid[_nI,3]=='O')
 				//não tratado - somente para compatibilidade com outras funções
 			ElseIf(_aValid[_nI,3]=='L')
 				::SetResponse('"'+_aValid[_nI,1]+'":'+alltrim(cvaltochar(&(_aValid[_nI,5])))+iif(_nI<len(_aValid),',',''))			
 			ElseIf(_aValid[_nI,3]=='D')
 				::SetResponse('"'+_aValid[_nI,1]+'":"')
-				If(TYPE(_aValid[_nI,5])='D')
+				IF(TYPE(_aValid[_nI,5])='D')
 					::SetResponse(dtos(&(_aValid[_nI,5]))+'"')
-				ElseIf(TYPE(_aValid[_nI,5])='C')
+				ELSEIF(TYPE(_aValid[_nI,5])='C')
 					::SetResponse(&(_aValid[_nI,5])+'"')
-				EndIf
+				ENDIF
 				::SetResponse(iif(_nI<len(_aValid),',',''))			
 			ElseIf(_aValid[_nI,3]=='N')
 				::SetResponse('"'+_aValid[_nI,1]+'":'+alltrim(cvaltochar(&(_aValid[_nI,5])))+iif(_nI<len(_aValid),',',''))
 			EndIf
 		Next
-		
+	
 		::SetResponse('}')
-	EndIf
+	ENDIF
 	
 	::SetResponse("}")
 	
@@ -642,9 +604,3 @@ EndIf
 
 Return _lRet
 
-static function formatjson(_ctexto)
-
-_ctexto := strtran(_ctexto,"\","\\")
-_ctexto := STRTRAN(STRTRAN(noacento(_ctexto),'"',''),'	','')
-
-return _ctexto

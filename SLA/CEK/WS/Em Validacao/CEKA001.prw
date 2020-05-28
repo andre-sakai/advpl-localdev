@@ -13,8 +13,8 @@ Local _cDv := ''
 Local _cEAN := '', _nTot :=0, _nTot2 :=0
 Local _nI, _nJ 	
 Local nHandle
-Local _lGvTodos := nil
-
+Local _lGvTodos := .F.
+Local _aAreaB1 
 Local _lCodn := .f.
 
 Default _cCodigo := ''
@@ -25,6 +25,8 @@ If(Select("SX2")=0)
 	_lPrepEnv := .T.
 EndIf
 
+
+_aAreaB1 := SB1->(GETAREA())
 
 nHandle := FCREATE("C:\ETIQUETA\LISTA_CODBAR2_"+DTOS(DATE())+'_'+STRTRAN(STRTRAN(TIME(),':','')," ","")+".txt")
 
@@ -41,9 +43,7 @@ EndIf
 	ZB1->(DBgotop())
 	IF(_nI > 0)
 		_lGvTodos := .F.
-		conout(CVALTOCHAR(_nI)+' - .F. - 44')
 	Else
-		conout(CVALTOCHAR(_nI)+' - .T. - 46')
 		_lGvTodos := .T.
 	ENDIF
 
@@ -154,6 +154,9 @@ EndIf
 	
 	
     FClose(nHandle)
+    
+    
+    RESTAREA(_aAreaB1)
 return
 
 
@@ -182,7 +185,7 @@ EndIf
 	set filter to 
 	SA1->(DBGOTOP())
 	
-	_cLinha := 'A1_COD;A1_LOJA;A1_NOME;A1_NREDUZ;A1_VEND;A3_NOME;' 
+	_cLinha := 'A1_COD;A1_LOJA;A1_NOME;A1_NREDUZ;A1_VEND;A3_NOME;A1_PCOMVEN;A1_TABELA' 
 	FWrite(nHandle, _cLinha + CRLF)
 		
 	
@@ -194,6 +197,8 @@ EndIf
 		_cLinha += "'"+alltrim(SA1->A1_NREDUZ)+';'
 		_cLinha += "'"+alltrim(SA1->A1_VEND)+';'
 		_cLinha += "'"+alltrim(POSICIONE('SA3',1,XFILIAL('SA3')+SA1->A1_VEND,'A3_NOME'))+';'
+		_cLinha += ""+alltrim(transform(SA1->A1_PCOMVEN,"@E 99.99"))+';'		
+		_cLinha += "'"+alltrim(SA1->A1_TABELA)+';'
 		
 		FWrite(nHandle, _cLinha + CRLF)
 		SA1->(DBSKIP())		

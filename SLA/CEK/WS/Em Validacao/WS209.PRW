@@ -105,11 +105,15 @@ cQry+="%"
 
 BEGINSQL ALIAS _cAlias
 	%NOPARSER%
-	SELECT ROW_NUMBER() OVER(ORDER BY B1_COD ASC) REG,* FROM %TABLE:SB1% SB1
+	SELECT ROW_NUMBER() OVER(ORDER BY B1_COD ASC) REG,* 
+		,SB1.R_E_C_N_O_ REC ,SB1.D_E_L_E_T_ DEL FROM %TABLE:SB1% SB1
 	INNER JOIN %TABLE:SBM% SBM ON B1_GRUPO=BM_GRUPO AND SBM.D_E_L_E_T_=''
+	LEFT JOIN %TABLE:SB2% SB2 ON B2_FILIAL=%exp:xfilial('SB2')% AND B2_LOCAL in ('02','04') AND B2_COD=B1_COD AND SB2.D_E_L_E_T_=''
 	WHERE SB1.D_E_L_E_T_='' %EXP:cQry%
 	ORDER BY B1_COD
 ENDSQL
+
+_cSql := getlastquery()[2]
 
 (_cAlias)->(DBGoTop())
 count to _nReg 
@@ -143,6 +147,18 @@ IF(!(_cAlias)->(EOF()))
 //		cChave:= (_cAlias)->(F2_FILIAL+F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA)
 		::SetResponse('{')
 		::SetResponse('"REG_NUM":'+cvaltochar((_cAlias)->REG)+',')
+		::SetResponse('"ESTOQUE":[')
+		::SetResponse('{')
+		IF((_cAlias)->(B2_QATU-B2_QPEDVEN-B2_RESERVA) > 0)
+		::SetResponse('"SALDO":'+CVALTOCHAR((_cAlias)->(B2_QATU-B2_QPEDVEN-B2_RESERVA)))	
+		ELSE
+		::SetResponse('"SALDO":0')
+		ENDIF
+		::SetResponse(',"QUANTIDADE":'+CVALTOCHAR((_cAlias)->B2_QATU))	
+		::SetResponse(',"PEDIDO":'+CVALTOCHAR((_cAlias)->B2_QPEDVEN))
+		::SetResponse(',"RESERVA":'+CVALTOCHAR((_cAlias)->B2_RESERVA))
+		::SetResponse('}')
+		::SetResponse('],')
 		_aValid := _aValidB1
 		For _nI := 1 to len(_aValid)
 			If(_aValid[_nI,3]=='C')
@@ -166,6 +182,8 @@ IF(!(_cAlias)->(EOF()))
 			EndIf
 			
 		Next
+		::SetResponse(',"DELETADO":"'+(_cAlias)->DEL+'"')
+		::SetResponse(',"RECNO":'+CVALTOCHAR((_cAlias)->REC)+'')
 		::SetResponse('}')
 		(_cAlias)->(DBSkip())
 	EndDo

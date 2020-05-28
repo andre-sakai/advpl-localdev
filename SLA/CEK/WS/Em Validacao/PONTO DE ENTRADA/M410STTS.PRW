@@ -119,7 +119,7 @@ else
   		dbSelectArea("SC5")
 		RecLock("SC5", .F.) 		
 			SC5->C5_BLPRECO := ' '		
-		MsUnLock("SC5")
+		SC5->(MsUnLock())
 endif
 
 Return
@@ -155,3 +155,17 @@ EndIf
 RestArea(aArea)
 
 Return nVlrDA1
+
+
+	User Function FtNRunFlCx()
+	 
+	Local lRet := .f. // Não executará o processamento do fluxo de caixa, após a geração do pedido de venda.
+	     
+	If TYPE("_cWSName") <> "U"
+	 	IF(_cWSName = 'WS206')
+			lRet := .t. 	
+			CONOUT("Passou pelo ponto de entrada - FtNRunFlCx ")
+		ENDIF
+	Endif
+	
+	RETURN lRet

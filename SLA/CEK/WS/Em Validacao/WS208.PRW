@@ -50,20 +50,24 @@ LOCAL cChave := ""
 LOCAL nPrimeiro := 0
 Local _cAlias
 Local _cAlias2
-Local _cCodFil,_cCodPed,_cCodSerie,_cCodNum, _cSql
+Local _cCodFil,_cCodPed,_cCodSerie,_cCodNum,_cCodCli,_cCodLoja, _cSql
 Local _aValidf2 := {},_aValidd2 := {}
 
 
 Private _aValid := {}
 
-Default SELF:cTipo :=''
-Default SELF:cFiltro := '' 
-Default SELF:cPedido := '' 
+
 Default _cCodFil:=''
-Default _cCodPed:=SELF:cPedido
+Default _cCodPed:=''
+
+Default SELF:NPAGINA 	:=1
+Default SELF:NREGISTRO 	:=20
+Default SELF:CFILTRO 	:=''
+Default SELF:CDTFILTRO	:=''
 
 DEFAULT SELF:CWSEMP := '01'
-DEFAULT SELF:CWSFIL := '01'
+DEFAULT SELF:CWSFIL := '0101'
+DEFAULT SELF:CWSDIC := 'N' 
 
 If(Select("SX2")=0)
 	RpcSetType(3)          
@@ -86,7 +90,9 @@ Else
 	//conout('','Token Ok')
 EndIf
 
-If Len(::aURLParms) = 2
+If Len(::aURLParms) = 0
+
+ElseIf Len(::aURLParms) = 2
 
 	_cCodCli := padr(::aURLParms[1],tamsx3('E1_CLIENTE')[1])
 	
@@ -106,7 +112,10 @@ ElseIf Len(::aURLParms) = 3
 		_cCodNum := padr(::aURLParms[3],tamsx3('E1_NUM')[1])
 	ENDIF
 Else
-	return .f.
+		
+	::SetResponse('WS208 - Parametros inválidos, deve ser informado Cliente e Loja ou Filial serie e Nota')
+	SetRestFault(499,'WS208 - Parametros inválidos, deve ser informado Cliente e Loja ou Filial serie e Nota')		
+	Return .F.
 EndIf
 _cAlias := getnextalias()
 _cAlias2 := getnextalias()
@@ -127,22 +136,52 @@ If(!empty(_cCodLoja))
 	cQry+= " AND E1_LOJA='"+_cCodLoja+"' "
 EndIf
 If(!empty(SELF:cFiltro))
-	cQry+= SELF:cFiltro
+	cQry+= " AND " + SELF:cFiltro + " "
 ELSE
 	cQry+= " AND E1_EMISSAO >= '20180101' "
 
 EndIf
 cQry+="%"
+conout('ws208')
 
-BEGINSQL ALIAS _cAlias
-	%NOPARSER%
-	COLUMN E1_EMISSAO AS DATE
-	SELECT ROW_NUMBER() OVER(ORDER BY E1_PREFIXO,E1_NUM,E1_PARCELA,E1_TIPO) REG, * FROM %TABLE:SE1% SE1
-	WHERE SE1.D_E_L_E_T_='' %EXP:cQry%
-	ORDER BY E1_PREFIXO,E1_NUM,E1_PARCELA,E1_TIPO
-ENDSQL
+IF(SE1->(FIELDPOS('E1_USERLGA')))
+	
+	BEGINSQL ALIAS _cAlias
+		%NOPARSER%
+		COLUMN E1_EMISSAO AS DATE
+		SELECT ROW_NUMBER() OVER(ORDER BY E1_PREFIXO,E1_NUM,E1_PARCELA,E1_TIPO) REG,
+				CASE 	WHEN E1_USERLGA = ' ' 
+						THEN   CONVERT(VARCHAR(10), CAST(DATEADD(DAY,CONVERT(INT,Convert(nvarchar(50),(ASCII(SUBSTRING(E1_USERLGI,12,1)) - 50))+Convert(nvarchar(50),(ASCII(SUBSTRING(E1_USERLGI,16,1)) - 50))), '1996-01-01') AS DATETIME),120)
+						ELSE CONVERT(VARCHAR(10), CAST(DATEADD(DAY,CONVERT(INT,Convert(nvarchar(50),(ASCII(SUBSTRING(E1_USERLGA,12,1)) - 50))+Convert(nvarchar(50),(ASCII(SUBSTRING(E1_USERLGA,16,1)) - 50))), '1996-01-01') AS DATETIME),120) 
+				END DTLGA,  *,
+				SE1.R_E_C_N_O_ RECSE1  FROM %TABLE:SE1% SE1
+		WHERE SE1.D_E_L_E_T_='' %EXP:cQry%
+		ORDER BY E1_PREFIXO,E1_NUM,E1_PARCELA,E1_TIPO
+	ENDSQL
+ELSE
 
+
+	BEGINSQL ALIAS _cAlias
+		%NOPARSER%
+		COLUMN E1_EMISSAO AS DATE
+		SELECT ROW_NUMBER() OVER(ORDER BY E1_PREFIXO,E1_NUM,E1_PARCELA,E1_TIPO) REG,
+				 *,
+				SE1.R_E_C_N_O_ RECSE1  FROM %TABLE:SE1% SE1
+		WHERE SE1.D_E_L_E_T_='' %EXP:cQry%
+		ORDER BY E1_PREFIXO,E1_NUM,E1_PARCELA,E1_TIPO
+	ENDSQL
+ENDIF
 _cSql := getlastquery()[2]
+
+(_cAlias)->(DBGoTop())
+count to _nReg 
+	
+_nIni := ( 1 + ((SELF:NPAGINA -1) * SELF:NREGISTRO ))
+_nFim := (SELF:NPAGINA * SELF:NREGISTRO)
+	
+SET FILTER TO REG >= _nIni .and. REG <=_nFim
+	
+conout('ws208 - query',_cSql)
 (_cAlias)->(DBGOTOP())
 _aValidE1 := U_WSCAMPOS(SELF:CTIPO,'SE1')
 _aValidE5 := U_WSCAMPOS(SELF:CTIPO,'SE5')
@@ -153,7 +192,7 @@ IF(!(_cAlias)->(EOF()))
 
 	::SetResponse('{"REGISTROS":[')
 	Do While !(_cAlias)->(Eof())
-	    
+	    dbselectarea(_cAlias)
 	    //Contador para inserir separador do json
 	    If nPrimeiro>0
 	     ::SetResponse(',')
@@ -161,6 +200,16 @@ IF(!(_cAlias)->(EOF()))
 	    nPrimeiro+= 1
 //		cChave:= (_cAlias)->(F2_FILIAL+F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA)
 		::SetResponse('{')
+		::SetResponse('"REG_NUM":'+cvaltochar((_cAlias)->REG)+',')
+		::SetResponse('"CHAVE_CLIENTE":"'+cvaltochar((_cAlias)->E1_CLIENTE+E1_LOJA)+'",')
+		::SetResponse('"CHAVE":"'+(_cAlias)->(E1_FILIAL+E1_PREFIXO+E1_NUM+E1_PARCELA+E1_TIPO)+'",')
+		If((_cAlias)->(fieldpos('RECSE1')))
+			::SetResponse('"RECNO":'+cvaltochar((_cAlias)->RECSE1)+',')
+		EndIf
+		If((_cAlias)->(fieldpos('DTALT')))
+			::SetResponse('"DTALT":"'+(_cAlias)->DTLGA+'",')
+		EndIf
+
 		_aValid := _aValidE1
 		For _nI := 1 to len(_aValid)
 			If(_aValid[_nI,3]=='C')
@@ -189,9 +238,9 @@ IF(!(_cAlias)->(EOF()))
 			(_cAlias2)->(dbclosearea())
 		ENDIF
 
-		::SetResponse('", BAIXAS":[')
+		::SetResponse(',"BAIXAS":[')
 		
-		_cQry2 := "% AND E5_PREFIXO='"+(_cAlias)->E1_PREFIXO+"' AND E5_NUMERO="+(_cAlias)->E1_NUM+" AND E5_TIPO='"+(_cAlias)->E1_TIPO+"' %"
+		_cQry2 := "% AND E5_PREFIXO='"+(_cAlias)->E1_PREFIXO+"' AND E5_NUMERO='"+(_cAlias)->E1_NUM+"'  AND E5_PARCELA='"+(_cAlias)->E1_PARCELA+"' AND E5_TIPO='"+(_cAlias)->E1_TIPO+"' AND E5_CLIENTE='"+(_cAlias)->E1_CLIENTE+"' AND E5_LOJA='"+(_cAlias)->E1_LOJA+"' %"
 
 		BEGINSQL ALIAS _cAlias2
 			%NOPARSER%
@@ -205,9 +254,10 @@ IF(!(_cAlias)->(EOF()))
 		While !(_cAlias2)->(Eof()) 
 			::SetResponse('{')
 			_aValid := _aValidE5
+			DbSelectArea(_cAlias2)
 			For _nI := 1 to len(_aValid)
 				If(_aValid[_nI,3]=='C')
-					::SetResponse('"'+_aValid[_nI,1]+'":"'+alltrim(&(_aValid[_nI,5]))+'"'+iif(_nI<len(_aValid),',',''))
+					::SetResponse('"'+_aValid[_nI,1]+'":"'+alltrim(NOACENTO(&(_aValid[_nI,5])))+'"'+iif(_nI<len(_aValid),',',''))
 				ElseIf(_aValid[_nI,3]=='M')
 					::SetResponse('"'+_aValid[_nI,1]+'":"'+alltrim(&(_aValid[_nI,5]))+'"'+iif(_nI<len(_aValid),',',''))
 				ElseIf(_aValid[_nI,3]=='O')
@@ -222,21 +272,24 @@ IF(!(_cAlias)->(EOF()))
 				
 			Next		
 			::SetResponse('}')
-			(_cAlias)->(DBSkip())
+			(_cAlias2)->(DBSkip())
 			//Verifica se continua no mesmo pedido
-			If !(_cAlias)->(Eof())
+			If !(_cAlias2)->(Eof())
 				::SetResponse(',')   
 			EndIf
 		EndDo
+		(_cAlias2)->(DBCloseArea())
 		
 		::SetResponse(']') //FECHA BAIXAS
 		::SetResponse('}') //FECHA PEDIDO
 		
 		(_cAlias)->(DBSkip())
 	EndDo
-	::SetResponse('"QUANTIDADE":,')
-	::SetResponse('"PAGINA":,')
-	::SetResponse('"DICIONARIO":{')
+	::SetResponse(']') //FECHA rEGISTROS
+	::SetResponse(', "QUANTIDADE":'+CVALTOCHAR(_nReg))
+	::SetResponse(', "PAGINA":'+CVALTOCHAR(SELF:NPAGINA))
+	If(SELF:CWSDIC=='S')
+	::SetResponse(',"DICIONARIO":{')
 		::SetResponse('"TITULO":[')
 		_aValid := _aValidE1
 		For _nI := 1 to len(_aValid)
@@ -270,14 +323,15 @@ IF(!(_cAlias)->(EOF()))
 			EndIf
 			::SetResponse("}")
 		Next		
-		::SetResponse('],')
+		::SetResponse(']')
 	::SetResponse('}')//FECHA DICIONARIO
+	endif
 	::SetResponse('}')//FECHA PEDIDOS
 	
 	(_cAlias)->(DBCLOSEAREA())
 Else
 	::SetResponse('{"ID":402,"Erro":"Nenhum cadastro encontrado!"}')
-	SetRestFault(402,'Nenhum cadastro encontrado, verifique as informações enviadas!'+_cSql)		
+	SetRestFault(402,'Nenhum cadastro encontrado, verifique as informações enviadas!')		
 	Return _lRet
 
 EndIf

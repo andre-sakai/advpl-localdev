@@ -116,14 +116,14 @@ cQry+="%"
 
 BEGINSQL ALIAS _cAlias
 	%NOPARSER%
-	SELECT 	ROW_NUMBER() OVER(ORDER BY E4_COD ASC) REG,
+	SELECT 	ROW_NUMBER() OVER(ORDER BY E4_CODIGO ASC) REG,
 			CASE 	WHEN E4_USERLGA = ' ' 
 					THEN   CONVERT(VARCHAR(10), CAST(DATEADD(DAY,CONVERT(INT,Convert(nvarchar(50),(ASCII(SUBSTRING(E4_USERLGI,12,1)) - 50))+Convert(nvarchar(50),(ASCII(SUBSTRING(E4_USERLGI,16,1)) - 50))), '1996-01-01') AS DATETIME),120)
 					ELSE CONVERT(VARCHAR(10), CAST(DATEADD(DAY,CONVERT(INT,Convert(nvarchar(50),(ASCII(SUBSTRING(E4_USERLGA,12,1)) - 50))+Convert(nvarchar(50),(ASCII(SUBSTRING(E4_USERLGA,16,1)) - 50))), '1996-01-01') AS DATETIME),120) 
 			END DTLGA, *,
 			E4_WSDTALT DTWSALT, R_E_C_N_O_ RECSE4, D_E_L_E_T_ DELSE4 FROM %TABLE:SE4% SE4
 	WHERE SE4.D_E_L_E_T_='' %EXP:cQry%
-	ORDER BY E4_COD
+	ORDER BY E4_CODIGO
 ENDSQL
 
 (_cAlias)->(DBGoTop())
@@ -158,8 +158,8 @@ IF(!(_cAlias)->(EOF()))
 //		cChave:= (_cAlias)->(F2_FILIAL+F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA)
 		::SetResponse('{')
 		::SetResponse('"REG_NUM":'+cvaltochar((_cAlias)->REG)+',')
-		::SetResponse('"DTALT_mercos":"'+(_cAlias)->DTLGA+'",')
-		::SetResponse('"DTALT_cek":"'+(_cAlias)->DTWSALT+'",')
+		::SetResponse('"DTALT":"'+(_cAlias)->DTLGA+'",')
+		::SetResponse('"DTHALTH":"'+(_cAlias)->DTWSALT+'",')
 		_aValid := _aValidE4
 		For _nI := 1 to len(_aValid)
 			If(_aValid[_nI,3]=='C')

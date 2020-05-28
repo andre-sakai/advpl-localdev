@@ -85,7 +85,7 @@ If Len(::aURLParms) > 0
 	// insira aqui o código para pesquisa do parametro recebido
 	// consulta de cliente por documento
 	_cCodigo := padr(::aURLParms[1],tamsx3('DA0_CODTAB')[1])
-	_cCodPro := padr(::aURLParms[1],tamsx3('DA1_CODTAB')[1])
+	_cCodPro := padr(::aURLParms[1],tamsx3('DA1_CODPRO')[1])
 Else
 	_cCodigo := ''
 EndIf
@@ -100,11 +100,21 @@ EndIf
 IF(!EMPTY(_cCodigo))
 	cQry+= " AND DA0_CODTAB='" + _cCodigo + "' "
 ENDIF
+If(!EMPTY(SELF:CDTFILTRO))
+	IF(!empty(cQry))
+		cQry += " AND "
+	ENDIF
+	cQry += " CASE WHEN DA0_USERGA != ' ' THEN   CONVERT(VARCHAR(10), CAST(DATEADD(DAY,CONVERT(INT,Convert(nvarchar(50),(ASCII(SUBSTRING(DA0_USERGA,12,1)) - 50))+Convert(nvarchar(50),(ASCII(SUBSTRING(DA0_USERGA,16,1)) - 50))), '1996-01-01') AS DATETIME),120) WHEN DA0_USERGI != ' ' THEN CONVERT(VARCHAR(10), CAST(DATEADD(DAY,CONVERT(INT,Convert(nvarchar(50),(ASCII(SUBSTRING(DA0_USERGI,12,1)) - 50))+Convert(nvarchar(50),(ASCII(SUBSTRING(DA0_USERGI,16,1)) - 50))), '1996-01-01') AS DATETIME),120) ELSE '          ' END >= '"+SELF:CDTFILTRO+"' "
+EndIf
 cQry+="%"
 
 BEGINSQL ALIAS _cAlias
 	%NOPARSER%
-	SELECT ROW_NUMBER() OVER(ORDER BY DA0_CODTAB ASC) REG,* FROM %TABLE:DA0% DA0
+	SELECT ROW_NUMBER() OVER(ORDER BY DA0_CODTAB ASC) REG,*,
+		CASE WHEN DA0_USERGA != ' ' THEN   CONVERT(VARCHAR(10), CAST(DATEADD(DAY,CONVERT(INT,Convert(nvarchar(50),(ASCII(SUBSTRING(DA0_USERGA,12,1)) - 50))+Convert(nvarchar(50),(ASCII(SUBSTRING(DA0_USERGA,16,1)) - 50))), '1996-01-01') AS DATETIME),120)
+			WHEN DA0_USERGI != ' ' THEN CONVERT(VARCHAR(10), CAST(DATEADD(DAY,CONVERT(INT,Convert(nvarchar(50),(ASCII(SUBSTRING(DA0_USERGI,12,1)) - 50))+Convert(nvarchar(50),(ASCII(SUBSTRING(DA0_USERGI,16,1)) - 50))), '1996-01-01') AS DATETIME),120)
+			ELSE '          ' END DTLGA
+	FROM %TABLE:DA0% DA0
 	WHERE DA0.D_E_L_E_T_='' %EXP:cQry%
 	ORDER BY DA0_CODTAB
 ENDSQL
@@ -141,6 +151,12 @@ IF(!(_cAlias)->(EOF()))
 //		cChave:= (_cAlias)->(F2_FILIAL+F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA)
 		::SetResponse('{')
 		::SetResponse('"REG_NUM":'+cvaltochar((_cAlias)->REG)+',')
+		IF((_cAlias)->(FIELDPOS("DTLGA")>0))
+			::SetResponse('"DTALT":"'+(_cAlias)->DTLGA+'",')
+		ENDIF
+		IF((_cAlias)->(FIELDPOS("DA0_WSDTAL")>0))
+			::SetResponse('"DTHALT":"'+ALLTRIM((_cAlias)->DA0_WSDTAL)+'",')
+		ENDIF
 		_aValid := _aValidD0
 		For _nI := 1 to len(_aValid)
 			If(_aValid[_nI,3]=='C')
